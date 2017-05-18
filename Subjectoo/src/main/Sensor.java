@@ -9,22 +9,24 @@ public class Sensor
 	private double batteryLevel;
 	private double fineDustReading;
 	private SubjectiveOpinion sensorOpinion;
-	private Date lastReading;
+	private Date lastReadingStamp;
 	private double xCoordinate;
 	private double yCoordinate;
 	private static double alpha = 0.75;
-	
-	
+	private boolean isActive;
+
+
 	public Sensor()
 	{
-		
+
 	}
-	
+
 	public Sensor(int id, double xCoordinate, double yCoordinate)
 	{
 		this.id = id;
 		this.xCoordinate = xCoordinate;
 		this.yCoordinate = yCoordinate;
+		isActive = false;
 	}
 
 	public void setId(int id) {
@@ -43,8 +45,8 @@ public class Sensor
 		this.sensorOpinion = sensorOpinion;
 	}
 
-	public void setLastReading(Date lastReading) {
-		this.lastReading = lastReading;
+	public void setLastReadingStamp(Date lastReadingStamp) {
+		this.lastReadingStamp = lastReadingStamp;
 	}
 
 	public void setxCoordinate(double xCoordinate) {
@@ -53,6 +55,18 @@ public class Sensor
 
 	public void setyCoordinate(double yCoordinate) {
 		this.yCoordinate = yCoordinate;
+	}
+
+	public static double getAlpha() {
+		return alpha;
+	}
+
+	public static void setAlpha(double alpha) {
+		Sensor.alpha = alpha;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
 	}
 
 	public int getId() {
@@ -71,8 +85,8 @@ public class Sensor
 		return sensorOpinion;
 	}
 
-	public Date getLastReading() {
-		return lastReading;
+	public Date getLastReadingStamp() {
+		return lastReadingStamp;
 	}
 
 	public double getxCoordinate() {
@@ -83,11 +97,27 @@ public class Sensor
 		return yCoordinate;
 	}
 	
+	public boolean isActive()
+	{
+		return isActive;
+	}
+
 	public void recieveReading (double batteryLevel, double fineDustReading)
 	{
 		double beliefComponent = (batteryLevel/100)-(100*alpha/batteryLevel);
 		double disbeliefComponent = 1-beliefComponent; 
 		SubjectiveOpinion newComponent = new SubjectiveOpinion(beliefComponent,disbeliefComponent,0);
-		
+		if (sensorOpinion == null)
+		{
+			sensorOpinion = newComponent;
+			this.fineDustReading = fineDustReading;
+		}
+		else
+		{
+			this.fineDustReading = (this.fineDustReading*sensorOpinion.getExpectation()+fineDustReading*newComponent.getExpectation())/(sensorOpinion.getExpectation()+newComponent.getExpectation());
+			sensorOpinion = sensorOpinion.fuse(newComponent);			
+		}		
+		lastReadingStamp = new Date();
+		isActive = true;
 	}
 }
