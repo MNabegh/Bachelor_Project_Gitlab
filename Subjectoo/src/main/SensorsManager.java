@@ -82,20 +82,21 @@ public class SensorsManager
 
 	}
 
-	private static void nullifyAll() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private static void updateReputations(double finalReading, SubjectiveOpinion finalDecision) 
+	private static void nullifyAll()
 	{
 		for(Sensor s: sensorsList.values())
 		{
 			s.setSensorOpinion(null);
 			s.setBatteryLevel(0.0);
 			s.setActive(false);
-			s.setFineDustReading(-1.0);
+			s.setFineDustReading(-1.0);   
 		}
+		
+	}
+
+	private static void updateReputations(double finalReading, SubjectiveOpinion finalDecision) 
+	{
+		
 	}
 
 
