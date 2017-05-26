@@ -1,0 +1,10 @@
+import no.uio.subjective_logic.SubjectiveOpinion;
+
+public class Sensor 
+{
+	double id;
+	double batteryLevel;
+	double fineDustReading;
+	SubjectiveOpinion 
+
+}

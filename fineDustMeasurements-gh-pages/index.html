@@ -1,0 +1,468 @@
+<html>
+<head>
+   <title>Übersicht der Feinstaubmessungen in Baden-Württemberg</title>
+
+	<meta charset="utf-8">   
+   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+		
+   <style type="text/css">
+
+		.fancybox-custom .fancybox-skin {
+			box-shadow: 0 0 50px #222;
+		}
+
+   table, html, body, #map, h4, ul {
+      height:100%;
+      width:100%;
+      padding:0px;
+      margin:0px;
+      font-size:8pt;
+   } 
+   
+   h4{
+   	margin: 6px 0px;
+   }
+   h1{
+	font-size:12pt;
+   }
+   a {
+   color: #FEFEFE;
+   text-decoration:none;
+   font-style:italic;   
+   }
+
+	
+	#dialog a{
+   font-style:normal;   
+   font-weight: 600;
+	color: #333333;
+	font-family: sans;
+	} 
+
+	#title{
+	background:#333333;
+	position: fixed;
+	top:10px;
+	right:30px;
+	z-index:100;
+	color: #FEFEFE;
+	font-family: sans;
+	border: 1px solid #333;
+	margin:4px;
+	padding:4px;
+	filter: alpha(opacity=80);
+	-moz-opacity:0.8;
+	-khtml-opacity: 0.8;
+	opacity: 0.8;
+
+	border-radius: 4px;
+	-o-border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	}   
+
+	#dialog{
+	width:400px;
+	display:none;
+	font-family: sans;
+	}   
+
+   
+	#slider{
+	margin:12px;
+	}
+	#dateInput{
+	width: 50%;
+	}
+	#legendblock2,#legendblock3,#legendblock4,#legendblock5{
+	width: 50%;
+	color: #000;
+	font-family: sans;
+	}
+	#legendblock6, #legendblock1{
+	color: #EEEEEE;
+	font-family: sans;
+	width: 50%;
+	}
+	#legenddescr{
+	color: #EEEEEE;
+	font-family: sans;
+	}
+	#legend{
+	background:#777777;
+	position: fixed;
+	bottom:30px;
+	right:30px;
+	z-index:100;
+	color: #EEEEEE;
+	font-family: sans;
+	border: 1px solid #EEEEEE;
+	margin:6px;
+	padding:6px;
+	filter: alpha(opacity=80);
+	-moz-opacity:0.8;
+	-khtml-opacity: 0.8;
+	opacity: 0.8;
+
+	border-radius: 6px;
+	-o-border-radius: 6px;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	}   
+
+	.logos {
+		position:absolute;
+		bottom:10px;
+		left:10px;
+		z-index:99;
+	}
+
+	.logos img, #dialogdiv img {
+		border:1px solid #000;
+	}
+
+	.logos img:hover, #dialog div img {
+		border:1px solid #0084b0;
+	}
+
+   </style>
+   
+ <!-- leafletJS -->
+ <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+ <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+ 
+ <!-- jQuery -->
+ <script src="http://code.jquery.com/jquery-2.1.0.js" type="text/javascript"></script>
+ <!-- jQuery-UI -->
+ <script src="./jquery-ui-1.10.4/js/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+ <link rel="stylesheet" href="./jquery-ui-1.10.4/css/ui-lightness/jquery-ui-1.10.4.min.css" type="text/css" media="screen" />
+
+ <!-- fancybox -->
+ <link rel="stylesheet" href="./fancybox/jquery.fancybox.css" type="text/css" media="screen" />
+ <script type="text/javascript" src="./fancybox/jquery.fancybox.pack.js"></script>
+
+
+   <script language="javascript">
+
+//scale factor for the circles. This means, scaleFactor*value is used as circle size.
+var scaleFactor = 444444;
+var minSize=3000;
+var maxSize=15000;
+
+function doScale(x){//pi *r^2 = A --> r = sqrt(A/pi)
+	return Math.min(minSize + Math.sqrt(x*scaleFactor), maxSize);
+}
+
+// array that will map integers to strings. Filled at the start, so that we can dynamically assign numbers and days.
+// the idea is that timeStep[i] will be the ith day of the year, assuming exactly one years worth of data is loaded.
+// however, we can use the same mechanism to work with months, e.g., by creating json that contains entries for 1.1.2013, 1.2.2013 and so on.
+// then, timeStep[i] will be the ith month instead. Obviously, this requires that the json is ordered.
+var timeStep = [];
+
+//dictionary that maps a value to its circles' properties (currently only the color).
+var decoration = { 10 : ["green"], 20 : ["lightgreen"], 35: ["yellow"], 50: ["orange"], 100: ["red"], 1000: ["purple"] };
+
+	/**
+	Global vars.
+	**/
+	var currentPlayIndex = 0;
+	var intervalID = false;
+	var map;
+	var data;
+	var circleLayer;
+
+	/**
+	Function to generate a circle.
+	**/
+	//address: string containing location of measurement node.
+	//position: coordinates as array, e.g. [48.40, 9.98]
+	//value: measurement value in µg/m³.
+	function circleInstance(address, position, value){
+		var colorValue = "";
+		var size;
+		if(value <= 10){
+			colorValue = decoration[10];
+		}else if(value <= 20){
+			colorValue = decoration[20];
+		}else if(value <= 35){
+			colorValue = decoration[35];
+		}else if(value <= 50){
+			colorValue = decoration[50];
+		}else if(value <= 100){
+			colorValue = decoration[100];
+		}else{
+			colorValue = decoration[1000];
+		}
+		size=doScale(value); //size of the circle -- important for colorblind users!
+	
+	
+		var circle = L.circle(position, size, {
+			color: "#666",
+			fillColor: colorValue,
+			fillOpacity: 0.6
+		});
+		circle.bindPopup("Adresse: <b>" + address +  "</b><br>Wert: " + value + "&micro;g/m&sup3;");
+		return circle;
+	} // end of circleInstance
+
+	/**
+	Function to draw a specified date.
+	**/
+	function draw(myDate){
+		var circles=[];
+		if(circleLayer != null){
+			//circleLayer.removeFrom(map);
+			circleLayer.clearLayers();
+		}
+		console.log(myDate);
+		for (var i=0; i<data.length; i++) {
+			if (circles[i] != null){
+				circles[i].removeFrom(map);
+			}
+			var measure = data[i]["measurements"]; // array of date,measurement pairs
+			var val; //value to be displayed
+			for(var j=0; j<measure.length; j++){
+				if(measure[j][0] == myDate){ //check by simple string matching. Won't work for ranges.
+					val=measure[j][1];
+				}
+			}
+			if(val == "-" || typeof data[i]["coords"] == 'undefined' || data[i]["coords"].length==0 || data[i]["coords"]== "unknown"){
+				console.log("Warning, could not create circle for " + data[i]["address"]);
+				continue; 
+			}
+			console.log("Creating circle for " + data[i]["address"] + " at " + data[i]["coords"] + " with value " + val);
+			myCircle = circleInstance(data[i]["address"], data[i]["coords"], val);
+			circles.push(myCircle);
+			//myCircle.addTo(map);
+		}
+		circleLayer = L.layerGroup(circles);
+		circleLayer.addTo(map);
+		
+		//put the UI in a consistent state
+		$("#dateInput").val(myDate);
+	} // end of draw
+
+
+
+
+function doGeoNames(index){
+	var query =  "http://api.geonames.org/searchJSON?formatted=true&q=" + data[index]["address"] + ",%20germany&maxRows=1&lang=en&username=";
+	return $.getJSON(query, function(res){
+		 
+		if(typeof res["geonames"] == 'undefined' || res["totalResultsCount"] == 0){
+			data[index]["coords"]=undefined;
+			console.log("could not obtain geonames result");
+			return;
+		}else{
+			data[index]["coords"]=[res["geonames"][0]["lat"], res["geonames"][0]["lng"]];
+			console.log('{"address": '+data[index]["address"]+' "coords":'+data[index]["coords"]+'}');
+		}
+	});
+}
+
+/**
+Init function.
+**/
+	function init() {
+		map = new L.Map('map');                       
+	      
+		L.tileLayer('http://tiles.codefor.de/static/bbs/germany/{z}/{x}/{y}.png', {
+		   attribution: '<a target="_blank" href="http://ulmapi.de">UlmApi.de</a>, Map data &copy; 2014 OpenStreetMap contributors, Imagery &copy; 2014 OpenStreetMap contributors',
+		   minZoom: 7,
+		   maxZoom: 11
+		}).addTo(map);
+		map.attributionControl.setPrefix(''); // Don't show the 'Powered by Leaflet' text.
+	
+		//buildCtrls().addTo(map);
+	
+		var bw= new L.LatLng(48.62969, 9.1949); 
+		map.setView(bw, 8);
+		
+		document.getElementById('legendblock1').style.backgroundColor=decoration[10];
+		document.getElementById('legendblock2').style.backgroundColor=decoration[20];
+		document.getElementById('legendblock3').style.backgroundColor=decoration[35];
+		document.getElementById('legendblock4').style.backgroundColor=decoration[50];
+		document.getElementById('legendblock5').style.backgroundColor=decoration[100];
+		document.getElementById('legendblock6').style.backgroundColor=decoration[1000];
+		//load the list of available years.
+		$.getJSON("index.json", function(json){
+			index = eval(json);
+			console.log(index);
+			for(var i=0; i<index.length; i++){
+				var dropdown = document.getElementById("yearIndex");
+				var opt = document.createElement("option"); 
+				opt.text = index[i];
+				opt.value = index[i];
+				dropdown.options.add(opt);
+				console.log("created item:" + index[i]);
+			}
+		}).fail(function( jqxhr, textStatus, error ) {
+			console.log( "error:" + jqxhr+ textStatus+ error  );
+		});
+		//load default set. This is independent of index loading.
+		loadData("data"); 
+	} // end of init
+	
+	function loadData(id){
+		data = {};
+		console.log("fetching: " + id );
+		$.getJSON(id+".json", function(json) {
+			var obj;
+			$.getJSON("addr_coord.json", function(json0){
+				data = eval(json); // load
+				addrToCoord = eval(json0);
+				console.log(addrToCoord);
+
+				for(var i=0; i<data.length; i++){
+					var coord = [];
+					//this part is rather silly, I should just change addr_coord.json to be an address->coord map.
+					for(var j=0; j<addrToCoord.length; j++){
+						if(data[i]["address"]==addrToCoord[j]["address"]){
+							coord=addrToCoord[j]["coords"];
+						}
+					}
+					if(coord.length==0 ){
+						console.log("Warning, did not find coordinates for " + data[i]["address"]);
+						try{
+							if(obj){
+								obj=obj.done(doGeoNames(i));
+							}
+							else{
+								obj=doGeoNames(i);
+							}
+						}catch(e){
+							console.log(e);
+							data[i]["coords"]=undefined;
+						}
+						console.log(data[i]);
+					}else{
+						data[i]["coords"]=coord;
+					}
+				}
+
+				var arr=data[0]["measurements"];
+				for(var i = 0; i<arr.length; i++){ // fill the timeStep array; assumes the json is sorted.
+					timeStep[i] = arr[i][0];
+				}
+		
+				$(function() {
+					var cbSlider = function(event, ui){
+						draw(timeStep[ui.value]);
+						currentPlayIndex = ui.value;
+					};
+					$( "#slider" ).slider({ min: 0, max: timeStep.length-1, step: 1, change: cbSlider, slide: cbSlider});
+				});
+		
+				//we loaded everything, lets draw the first date
+				if(obj){
+					obj.done(draw(timeStep[0]));
+				}else{
+					draw(timeStep[0]);
+				}
+				$("#dateInput").val(timeStep[0]);
+			}).fail(function( jqxhr, textStatus, error ) {
+			console.log( "error:" + jqxhr+ textStatus+ error  );
+			});
+	
+		}).fail(function( jqxhr, textStatus, error ) {
+			console.log( "error:" + jqxhr+ textStatus+ error  );
+		});
+	} // end of loadData
+
+	/*function to manually set the date. It assumes a correct date format.*/
+	function showManual(str){
+		console.log(str);
+		draw(str);
+		var v = 0;
+		for(var i = 0; i<timeStep.length; i++){
+			if(timeStep[i]==str){
+				v=i;
+			}
+		}
+		$("#slider").slider("value",v);
+	}
+
+	function play(){
+		//are we already playing?
+		if(intervalID === false){
+			//start playing.
+			intervalID = setInterval(function(){$("#slider").slider("value",currentPlayIndex); currentPlayIndex++;}, 1000);
+			document.getElementsByName('playpause')[0].value="Pause";
+		}else{
+			//stop playing.
+			clearInterval(intervalID);
+			intervalID = false;
+			document.getElementsByName('playpause')[0].value="Play";
+		}
+	}
+   </script>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		$(".fancybox").fancybox();
+	});
+</script>
+  
+</head>
+<body onLoad="javascript:init();">
+
+
+   <div id="dialog">
+   <h4>&Uuml;ber dieses Projekt</h4>
+<p>Auf dieser Karte werden Messungen von Feinstaub in Baden-Württemberg angezeigt. Die Daten stammen aus einer Excel-Tabelle von einer Landesbehörde (<a href="http://www.lubw.baden-wuerttemberg.de/" target="_blank">LUBW</a>) und sind öffentlich. Die Positionen der Kreise sind in der Original-Quelle nicht vorhanden. Wir haben <a target="_blank" href="http://geonames.org/">geonames</a> verwendet, um die Positionen aufzulösen.</p>
+
+<p>Dieses Projekt ist von der <a target="_blank" href="http://www.ulmapi.de">datalove-Gruppe / UlmAPI</a> entwickelt worden. Der Quelltext der Seite, sowie die Daten und Skripte um die Daten zu aktualisieren, befindet sich auf <a target="_blank" href="https://github.com/UlmApi/fineDustMeasurements">github</a>.</p>
+
+<h4>Kontakt</h4>
+<p>WWW: <a target="_blank" href="http://www.ulmapi.de">ulmapi.de</a><br/>
+Mail: datalove (at) uni-ulm.de <br/>
+Twitter: <a target="_blank" href="http://twitter.com/ulmapi">@ulmapi</a><br/>
+</p>
+   </div>
+
+
+   <div id="legend">
+	<h1>Feinstaub in Baden-Württemberg</h1>
+
+Wählen Sie einem Jahr aus: <select id='yearIndex' onchange="
+	// Get the current index
+	index = this.selectedIndex;
+	if (index >= 0 && this.options.length > index) {
+		// Get the new value
+		newValue = this.options[index].value;
+	}
+	console.log('the user selected: ' + newValue);
+	loadData(newValue);
+	">
+</select>
+	<p> Aktuell wird angezeigt: <br> <input type="text" name="dateInput" id="dateInput" value="1.1.13"> <input onclick="showManual(document.getElementsByName('dateInput')[0].value);" type="button" value="Verändern!"> <br> 
+	Sie können auch den Slider verwenden:</p>
+       <div id="slider">
+       </div>
+	Automatisch schieben: <input onclick="play();"  name="playpause" type="button" id="playpause" value="Play"></p>
+
+   <h4>Legende</h4>
+	<p><div id='legenddescr'>Die Farbe und Größe jedes Kreises stellt den Feinstaubwert dar:</div>
+		<div id='legendblock1'> &lt; 10 µg/m³</div>
+		<div id='legendblock2'> &lt; 20 µg/m³</div>
+		<div id='legendblock3'> &lt; 35 µg/m³</div>
+		<div id='legendblock4'> &lt; 50 µg/m³</div>
+		<div id='legendblock5'> &lt; 100 µg/m³</div>
+		<div id='legendblock6'> &gt; 100 µg/m³</div>
+	</p>
+
+	<p>	<a href='#dialog' class='fancybox'>Mehr Informationen über diese Karte…</a></p>
+   </div>
+   
+   <div class="logos">
+      <a target="_blank" href="http://www.ulmapi.de"><img src="img/ulmapi.png" alt="ulmapi" title="Ein Projekt von Datalove Ulm / ulmAPI.de"></a>
+   </div>
+
+   <div id="map"></div>
+
+   <div id="debug"></div>
+
+
+</body>                                                                                                                          
+</html>
+    
