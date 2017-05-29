@@ -98,18 +98,6 @@ public class SensorsManager
 	{
 		
 	}
-	
-	private static double modelPredictionRoadLength(double ELEV, double COMM, double RES, double IND)
-	{
-		// define units and revise COMM.300 RES.750 & IND.300
-		return 0.036- ELEV*0.019 + COMM * 2.58 + RES * 0.035 + IND * 0.319;				
-	}
-	
-	private static double modelPredictionVeichleDensity(double AD, double ELEV, double COMM, double RES)
-	{
-		// define units and revise COMM.300 AD.100 & RES.750
-		return 1.01 + AD * 0.002 - ELEV * 0.018 + COMM * 2.88 + RES * 0.025;
-	}
 
 
 
