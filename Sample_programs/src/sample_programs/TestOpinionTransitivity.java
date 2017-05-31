@@ -7,9 +7,9 @@ public class TestOpinionTransitivity
 	
 	public static void main(String[] args)
 	{
-		SubjectiveOpinion ab = new SubjectiveOpinion(00.4,0.1,0.5,0.6);
-		SubjectiveOpinion be = new SubjectiveOpinion(0.9,0,0.1,0.4);
-		SubjectiveOpinion ae = be.discountBy(ab);
+		SubjectiveOpinion aa = new SubjectiveOpinion(0.9,0,0.1);
+		SubjectiveOpinion ae = new SubjectiveOpinion(1,0,0);
+		ae = ae.discountBy(aa);
 		
 		System.out.println(ae);
 	}
