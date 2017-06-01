@@ -47,7 +47,7 @@ public class SensorsManager
 		double sensorsSummation = 0.0;
 		double weightsSummation = 0.0;
 		SubjectiveOpinion firstOpinion = null;
-		ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
+		ArrayList<SubjectiveOpinion> toGetCumiliated = new ArrayList<SubjectiveOpinion>();
 		Date now = new Date();
 		now.setHours(now.getHours()-1);
 
@@ -68,11 +68,11 @@ public class SensorsManager
 			if(firstOpinion == null)
 				firstOpinion = serversOpinion;
 			else
-				toGetCumulated.add(serversOpinion);
+				toGetCumiliated.add(serversOpinion);
 		}
 
 		finalReading = sensorsSummation/weightsSummation;
-		SubjectiveOpinion finalDecision = firstOpinion.fuse(toGetCumulated);
+		SubjectiveOpinion finalDecision = firstOpinion.fuse(toGetCumiliated);
 
 		updateReputations(finalReading,finalDecision);
 		nullifyAll();
@@ -96,41 +96,7 @@ public class SensorsManager
 
 	private static void updateReputations(double finalReading, SubjectiveOpinion finalDecision) 
 	{
-		ArrayList<SubjectiveOpinion> updatedReputations = new ArrayList<SubjectiveOpinion>();
-		for (Sensor updatedSensor : sensorsList.values())
-		{
-			double cumuliativeResult = 0.0;
-			double sensorsSummation = 0.0;
-			double sensorsSquare = 0.0;
-			double weightsSummation = 0.0;
-			SubjectiveOpinion firstOpinion = null;
-			ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
-			for(Sensor s: sensorsList.values())
-			{
-				if(updatedSensor == s)
-					continue;
-				
-				if(s.getSensorOpinion()== null)
-					continue;
-
-				sensorsSummation += s.getFineDustReading()*s.getSensorOpinion().getExpectation();
-				sensorsSquare += (Math.pow(s.getFineDustReading(),2))*s.getSensorOpinion().getExpectation();
-				weightsSummation += s.getSensorOpinion().getExpectation();
-				SubjectiveOpinion serversOpinion = s.getSensorOpinion().discountBy(reputationList.get(s.getId()));
-				if(firstOpinion == null)
-					firstOpinion = serversOpinion;
-				else
-					toGetCumulated.add(serversOpinion);
-			}
-			
-			// Create cumulation result and cumulative deviation without the sensor to be added			
-			cumuliativeResult = sensorsSummation/weightsSummation;
-			double meanOfSquaredValues  = sensorsSquare/weightsSummation;
-			double readingsDeviation = Math.sqrt(meanOfSquaredValues - (Math.pow(cumuliativeResult, 2)));
-			SubjectiveOpinion cumulativeDecision = firstOpinion.fuse(toGetCumulated);
-			
-			
-		}
+		
 	}
 	
 	private static double modelPredictionRoadLength(double ELEV, double COMM, double RES, double IND)

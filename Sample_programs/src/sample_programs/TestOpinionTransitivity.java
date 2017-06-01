@@ -11,7 +11,7 @@ public class TestOpinionTransitivity
 		SubjectiveOpinion ae = new SubjectiveOpinion(1,0,0);
 		ae = ae.discountBy(aa);
 		
-		System.out.println(ae);
+		System.out.println(Math.pow(3, 2));
 	}
 
 }
