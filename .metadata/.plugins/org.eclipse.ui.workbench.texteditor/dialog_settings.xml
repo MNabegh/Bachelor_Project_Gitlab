@@ -2,17 +2,22 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="conse" key="selection"/>
+		<item value="" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="clone"/>
+			<item value="copy"/>
+			<item value="toGetCumiliated"/>
 			<item value="conse"/>
 			<item value="trans"/>
 			<item value="public Subj"/>
 		</list>
 		<list key="replacehistory">
+			<item value="toGetCumulated"/>
+			<item value="cumulative"/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">

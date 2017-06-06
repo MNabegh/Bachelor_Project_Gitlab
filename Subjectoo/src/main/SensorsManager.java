@@ -11,7 +11,9 @@ public class SensorsManager
 
 	private static HashMap<Integer,Sensor>sensorsList = new HashMap<Integer,Sensor>();
 	private static HashMap<Integer,SubjectiveOpinion> reputationList = new HashMap<Integer,SubjectiveOpinion>();
-	private static double PMThreshold = 7.2 ; 
+	private static double PMThreshold = 7.2 ;
+	private static HashMap<Integer,Double> evidenceFor = new HashMap<Integer,Double>();
+	private static HashMap<Integer,Double> evidenceAgainst = new HashMap<Integer,Double>();
 
 	public static void registerSensor(int id, double xCoordinate, double yCoordinate) throws Exception
 	{
@@ -32,6 +34,8 @@ public class SensorsManager
 					sensorsList.put(id, newSensor);
 					SubjectiveOpinion newOpinion = new SubjectiveOpinion(0,0,1,0.5);
 					reputationList.put(id, newOpinion);	
+					evidenceFor.put(id,0.0);
+					evidenceAgainst.put(id,0.0);
 
 				}
 
@@ -53,7 +57,7 @@ public class SensorsManager
 
 		for(Sensor s: sensorsList.values())
 		{
-			
+
 			if(s.getSensorOpinion()== null)
 				continue;
 			if(s.getLastReadingStamp().before(now))
@@ -89,14 +93,15 @@ public class SensorsManager
 			s.setSensorOpinion(null);
 			s.setBatteryLevel(0.0);
 			s.setActive(false);
-			s.setFineDustReading(-1.0);   
+			s.setFineDustReading(-1.0); 
 		}
-		
+
 	}
 
 	private static void updateReputations(double finalReading, SubjectiveOpinion finalDecision) 
 	{
-		ArrayList<SubjectiveOpinion> updatedReputations = new ArrayList<SubjectiveOpinion>();
+		HashMap<Integer, SubjectiveOpinion> updatedReputations= new HashMap<Integer,SubjectiveOpinion>();
+		
 		for (Sensor updatedSensor : sensorsList.values())
 		{
 			double cumuliativeResult = 0.0;
@@ -109,7 +114,7 @@ public class SensorsManager
 			{
 				if(updatedSensor == s)
 					continue;
-				
+
 				if(s.getSensorOpinion()== null)
 					continue;
 
@@ -122,23 +127,82 @@ public class SensorsManager
 				else
 					toGetCumulated.add(serversOpinion);
 			}
-			
-			// Create cumulation result and cumulative deviation without the sensor to be added			
+
+			// Create cumulation result and cumulative deviation without the sensor to be added, *reading sent before updating the reputations		
 			cumuliativeResult = sensorsSummation/weightsSummation;
 			double meanOfSquaredValues  = sensorsSquare/weightsSummation;
 			double readingsDeviation = Math.sqrt(meanOfSquaredValues - (Math.pow(cumuliativeResult, 2)));
 			SubjectiveOpinion cumulativeDecision = firstOpinion.fuse(toGetCumulated);
+
+			double readingUnaccruacy = updatedSensor.getFineDustReading()*(1-updatedSensor.getSensorOpinion().getExpectation());		
+			double [] readings = {updatedSensor.getFineDustReading(), 
+					updatedSensor.getFineDustReading()-readingUnaccruacy, 
+					updatedSensor.getFineDustReading()+readingUnaccruacy};
+			double decisionWieght = -1.0;
+			boolean flag = false;
+
+			// most trustworthyReading approach to eliminate the effect of the battery consumption
+			for (double reading: readings)
+			{
+				if(reading<cumuliativeResult)
+				{
+					if(reading>cumuliativeResult-readingsDeviation)
+					{
+						if(!flag || (flag && decisionWieght<reading - (cumuliativeResult-readingsDeviation)))
+						{
+							decisionWieght = reading - (cumuliativeResult-readingsDeviation);
+							flag = true;
+						}
+					}
+
+					else
+
+						if(decisionWieght == -1.0 || (!flag && decisionWieght>(
+								cumuliativeResult-readingsDeviation) - reading))
+							decisionWieght = (cumuliativeResult-readingsDeviation) - reading;
+				}
+				else 
+				{
+					if(reading<cumuliativeResult+readingsDeviation)
+					{
+						if(!flag || (flag && decisionWieght<(cumuliativeResult+readingsDeviation) - reading))
+						{
+							decisionWieght = (cumuliativeResult+readingsDeviation) - reading;
+							flag = true;
+						}
+					}
+
+					else
+
+						if(decisionWieght == -1.0 || (!flag && decisionWieght>reading - 
+								(cumuliativeResult+readingsDeviation)))
+							decisionWieght = (cumuliativeResult-readingsDeviation) - reading;
+				}
+			}
 			
-			
+			if(flag)
+				evidenceFor.put(updatedSensor.getId(), evidenceFor.get(updatedSensor.getId())+decisionWieght);
+			else
+				evidenceAgainst.put(updatedSensor.getId(), evidenceAgainst.get(updatedSensor.getId())+decisionWieght);
+			double belief = evidenceFor.get(updatedSensor.getId())/(evidenceFor.get(updatedSensor.getId())
+					+evidenceAgainst.get(updatedSensor.getId())+2);
+			double disbelief = evidenceAgainst.get(updatedSensor.getId())/(evidenceFor.get(updatedSensor.getId())
+					+evidenceAgainst.get(updatedSensor.getId())+2);
+			double uncertainity = 2/(evidenceFor.get(updatedSensor.getId())
+					+evidenceAgainst.get(updatedSensor.getId())+2);
+			double atomicity = reputationList.get(updatedSensor.getId()).getAtomicity();
+			SubjectiveOpinion updatedReputation = new SubjectiveOpinion(belief,disbelief,uncertainity,atomicity);
+			updatedReputations.put(updatedSensor.getId(), updatedReputation);
 		}
+		reputationList = updatedReputations;
 	}
-	
+
 	private static double modelPredictionRoadLength(double ELEV, double COMM, double RES, double IND)
 	{
 		// define units and revise COMM.300 RES.750 & IND.300
 		return 0.036- ELEV*0.019 + COMM * 2.58 + RES * 0.035 + IND * 0.319;				
 	}
-	
+
 	private static double modelPredictionVeichleDensity(double AD, double ELEV, double COMM, double RES)
 	{
 		// define units and revise COMM.300 AD.100 & RES.750
