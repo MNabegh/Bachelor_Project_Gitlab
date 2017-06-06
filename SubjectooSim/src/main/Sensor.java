@@ -14,6 +14,8 @@ public class Sensor
 	private double yCoordinate;
 	private static double alpha = 0.75;
 	private boolean isActive;
+	private double believeWeight = 0.0;
+	private double disbelieveWeight = 0.0;
 
 
 	public Sensor()
@@ -120,4 +122,5 @@ public class Sensor
 		lastReadingStamp = new Date();
 		isActive = true;
 	}
+	
 }
