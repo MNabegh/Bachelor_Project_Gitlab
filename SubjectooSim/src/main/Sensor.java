@@ -14,8 +14,6 @@ public class Sensor
 	private double yCoordinate;
 	private static double alpha = 0.75;
 	private boolean isActive;
-	private double believeWeight = 0.0;
-	private double disbelieveWeight = 0.0;
 
 
 	public Sensor()
@@ -98,7 +96,7 @@ public class Sensor
 	public double getyCoordinate() {
 		return yCoordinate;
 	}
-	
+
 	public boolean isActive()
 	{
 		return isActive;
@@ -108,19 +106,22 @@ public class Sensor
 	{
 		double beliefComponent = (batteryLevel/100)-(100*alpha/batteryLevel);
 		double disbeliefComponent = 1-beliefComponent; 
-		SubjectiveOpinion newComponent = new SubjectiveOpinion(beliefComponent,disbeliefComponent,0);
+		SubjectiveOpinion selfOpinion = new SubjectiveOpinion(beliefComponent,disbeliefComponent,0);
+		SubjectiveOpinion reading = new SubjectiveOpinion(1,0,0);
 		if (sensorOpinion == null)
 		{
-			sensorOpinion = newComponent;
+			sensorOpinion = reading.discountBy(selfOpinion);
 			this.fineDustReading = fineDustReading;
 		}
 		else
 		{
-			this.fineDustReading = (this.fineDustReading*sensorOpinion.getExpectation()+fineDustReading*newComponent.getExpectation())/(sensorOpinion.getExpectation()+newComponent.getExpectation());
-			sensorOpinion = sensorOpinion.fuse(newComponent);			
+			reading = reading.discountBy(selfOpinion);
+			this.fineDustReading = (this.fineDustReading*sensorOpinion.getExpectation()+
+					fineDustReading*reading.getExpectation())/(sensorOpinion.getExpectation()+reading.getExpectation());
+			sensorOpinion = sensorOpinion.fuse(reading);			
 		}		
 		lastReadingStamp = new Date();
 		isActive = true;
 	}
-	
+
 }
