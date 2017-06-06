@@ -4,7 +4,7 @@ import shutil
 days = range(1,32)
 months = range(1,13)
 years = [2016,2017]
-sensors = [1002, 1178, 1098, 2394]
+sensors = [1002, 1178, 1098, 2394,255,481,1973,1286,1462,2630]
 
 for i in years:
 	datey = str(i)
