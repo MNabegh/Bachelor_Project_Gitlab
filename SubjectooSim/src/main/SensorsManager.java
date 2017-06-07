@@ -44,6 +44,11 @@ public class SensorsManager
 
 		registerOperation.start();
 	}
+	
+	public static void recieveReading (int id, double fineDustReading, double batteryLevel, String timeStamp)
+	{
+		sensorsList.get(id).recieveReading(batteryLevel, fineDustReading, timeStamp);		
+	}
 
 	public static boolean setAlarm()
 	{
@@ -52,19 +57,19 @@ public class SensorsManager
 		double weightsSummation = 0.0;
 		SubjectiveOpinion firstOpinion = null;
 		ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
-		Date now = new Date();
-		now.setHours(now.getHours()-1);
+		//Date now = new Date();
+		//now.setHours(now.getHours()-1);
 
 		for(Sensor s: sensorsList.values())
 		{
 
 			if(s.getSensorOpinion()== null)
 				continue;
-			if(s.getLastReadingStamp().before(now))
+			/*if(s.getLastReadingStamp().before(now))
 			{
 				// remove sensors inactive for a week ..............................
 				continue;
-			}
+			}*/
 
 			sensorsSummation += s.getFineDustReading()*s.getSensorOpinion().getExpectation();
 			weightsSummation += s.getSensorOpinion().getExpectation();

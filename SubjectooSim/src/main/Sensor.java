@@ -9,7 +9,8 @@ public class Sensor
 	private double batteryLevel;
 	private double fineDustReading;
 	private SubjectiveOpinion sensorOpinion;
-	private Date lastReadingStamp;
+	//private Date lastReadingStamp;
+	private String lastReadingStamp;
 	private double xCoordinate;
 	private double yCoordinate;
 	private static double alpha = 0.75;
@@ -26,7 +27,7 @@ public class Sensor
 		this.id = id;
 		this.xCoordinate = xCoordinate;
 		this.yCoordinate = yCoordinate;
-		isActive = false;
+		//isActive = false;
 	}
 
 	public void setId(int id) {
@@ -45,7 +46,7 @@ public class Sensor
 		this.sensorOpinion = sensorOpinion;
 	}
 
-	public void setLastReadingStamp(Date lastReadingStamp) {
+	public void setLastReadingStamp(String lastReadingStamp) {
 		this.lastReadingStamp = lastReadingStamp;
 	}
 
@@ -85,7 +86,7 @@ public class Sensor
 		return sensorOpinion;
 	}
 
-	public Date getLastReadingStamp() {
+	public String getLastReadingStamp() {
 		return lastReadingStamp;
 	}
 
@@ -102,7 +103,7 @@ public class Sensor
 		return isActive;
 	}
 
-	public void recieveReading (double batteryLevel, double fineDustReading)
+	public void recieveReading (double batteryLevel, double fineDustReading, String timeStamp)
 	{
 		double beliefComponent = (batteryLevel/100)-(100*alpha/batteryLevel);
 		double disbeliefComponent = 1-beliefComponent; 
@@ -120,8 +121,8 @@ public class Sensor
 					fineDustReading*reading.getExpectation())/(sensorOpinion.getExpectation()+reading.getExpectation());
 			sensorOpinion = sensorOpinion.fuse(reading);			
 		}		
-		lastReadingStamp = new Date();
-		isActive = true;
+		lastReadingStamp = timeStamp;
+		//isActive = true;
 	}
 
 }

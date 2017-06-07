@@ -2,5 +2,11 @@
 <qualifiedTypeNameHistroy>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
+<fullyQualifiedTypeName name="java.io.File"/>
+<fullyQualifiedTypeName name="main.Main"/>
 <fullyQualifiedTypeName name="no.uio.subjective_logic.opinion.SubjectiveOpinion"/>
+<fullyQualifiedTypeName name="java.io.BufferedReader"/>
+<fullyQualifiedTypeName name="java.io.FileReader"/>
+<fullyQualifiedTypeName name="java.util.Comparator"/>
+<fullyQualifiedTypeName name="java.util.Arrays"/>
 </qualifiedTypeNameHistroy>
