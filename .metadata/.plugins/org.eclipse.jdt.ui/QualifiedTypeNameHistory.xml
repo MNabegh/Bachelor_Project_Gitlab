@@ -9,4 +9,6 @@
 <fullyQualifiedTypeName name="java.io.FileReader"/>
 <fullyQualifiedTypeName name="java.util.Comparator"/>
 <fullyQualifiedTypeName name="java.util.Arrays"/>
+<fullyQualifiedTypeName name="main.FileHandler"/>
+<fullyQualifiedTypeName name="java.util.logging.FileHandler"/>
 </qualifiedTypeNameHistroy>
