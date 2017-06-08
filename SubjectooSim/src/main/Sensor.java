@@ -13,7 +13,7 @@ public class Sensor
 	private String lastReadingStamp;
 	private double xCoordinate;
 	private double yCoordinate;
-	private static double alpha = 0.75;
+	private static double alpha = 0.25;
 	private boolean isActive;
 	private double [] fineDustReadings;
 
@@ -105,25 +105,26 @@ public class Sensor
 		return isActive;
 	}
 
-	public void recieveReading (double batteryLevel, double fineDustReadings, int pos)
+	public void recieveReading (double fineDustReadings, int pos)
 	{
-		double beliefComponent = (batteryLevel/100)-(100*alpha/batteryLevel);
+		double batteryLevel = 100.0;
+		double beliefComponent = (batteryLevel/100.0)-(100.0*alpha/batteryLevel);
 		double disbeliefComponent = 1-beliefComponent; 
 		SubjectiveOpinion selfOpinion = new SubjectiveOpinion(beliefComponent,disbeliefComponent,0);
 		SubjectiveOpinion reading = new SubjectiveOpinion(1,0,0);
 		if (sensorOpinion == null)
 		{
 			sensorOpinion = reading.discountBy(selfOpinion);
-			this.fineDustReadings = fineDustReadings;
+			this.fineDustReadings[pos] = fineDustReadings;
 		}
 		else
 		{
 			reading = reading.discountBy(selfOpinion);
-			this.fineDustReadings = (this.fineDustReadings*sensorOpinion.getExpectation()+
+			this.fineDustReadings[pos] = (this.fineDustReadings[pos]*sensorOpinion.getExpectation()+
 					fineDustReadings*reading.getExpectation())/(sensorOpinion.getExpectation()+reading.getExpectation());
 			sensorOpinion = sensorOpinion.fuse(reading);			
 		}		
-		lastReadingStamp = timeStamp;
+		//lastReadingStamp = timeStamp;
 		//isActive = true;
 	}
 

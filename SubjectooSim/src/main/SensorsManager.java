@@ -15,6 +15,8 @@ public class SensorsManager
 	private static HashMap<Integer,Double> evidenceFor = new HashMap<Integer,Double>();
 	private static HashMap<Integer,Double> evidenceAgainst = new HashMap<Integer,Double>();
 	private static Object lock = new Object();
+	private static int err = 0;
+	private static int err1 = 0;
 	
 	public static void registerSensor(int id, double xCoordinate, double yCoordinate) throws Exception
 	{		
@@ -37,12 +39,13 @@ public class SensorsManager
 				}
 	}
 	
-	public static void recieveReading (int id, double fineDustReading, double batteryLevel, String timeStamp)
+	public static void recieveReading (int id, double fineDustReading, int pos)
 	{
-		sensorsList.get(id).recieveReading(batteryLevel, fineDustReading, timeStamp);		
+		//sensorsList.get(id).recieveReading(batteryLevel, fineDustReading, pos);
+		sensorsList.get(id).recieveReading(fineDustReading, pos);
 	}
 
-	public static boolean setAlarm()
+	public static boolean setAlarm(int pos)
 	{
 		double finalReading = 0.0 ;
 		double sensorsSummation = 0.0;
@@ -51,6 +54,7 @@ public class SensorsManager
 		ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
 		//Date now = new Date();
 		//now.setHours(now.getHours()-1);
+		//System.out.println("SetAlarm");
 
 		for(Sensor s: sensorsList.values())
 		{
@@ -63,8 +67,9 @@ public class SensorsManager
 				continue;
 			}*/
 
-			sensorsSummation += s.getFineDustReading()*s.getSensorOpinion().getExpectation();
+			sensorsSummation += s.getFineDustReading()[pos]*s.getSensorOpinion().getExpectation();
 			weightsSummation += s.getSensorOpinion().getExpectation();
+			//System.out.println(s.getId()+" "+reputationList.get(s.getId()));
 			SubjectiveOpinion serversOpinion = s.getSensorOpinion().discountBy(reputationList.get(s.getId()));
 			if(firstOpinion == null)
 				firstOpinion = serversOpinion;
@@ -73,9 +78,14 @@ public class SensorsManager
 		}
 
 		finalReading = sensorsSummation/weightsSummation;
+		if(toGetCumulated.isEmpty())
+		{
+			//System.err.println(++err);
+			return false;
+		}
 		SubjectiveOpinion finalDecision = firstOpinion.fuse(toGetCumulated);
 
-		updateReputations(finalReading,finalDecision);
+		updateReputations(finalReading,finalDecision, pos);
 		nullifyAll();
 
 		return PMThreshold>=finalReading-finalReading*(1-finalDecision.getExpectation()) &&
@@ -89,18 +99,19 @@ public class SensorsManager
 		{
 			s.setSensorOpinion(null);
 			s.setBatteryLevel(0.0);
-			s.setActive(false);
-			s.setFineDustReading(-1.0); 
+			s.setActive(false); 
 		}
 
 	}
 
-	private static void updateReputations(double finalReading, SubjectiveOpinion finalDecision) 
+	private static void updateReputations(double finalReading, SubjectiveOpinion finalDecision, int pos) 
 	{
 		HashMap<Integer, SubjectiveOpinion> updatedReputations= new HashMap<Integer,SubjectiveOpinion>();
 		
 		for (Sensor updatedSensor : sensorsList.values())
 		{
+			if(updatedSensor.getSensorOpinion() == null)
+				continue;
 			double cumuliativeResult = 0.0;
 			double sensorsSummation = 0.0;
 			double sensorsSquare = 0.0;
@@ -115,8 +126,8 @@ public class SensorsManager
 				if(s.getSensorOpinion()== null)
 					continue;
 
-				sensorsSummation += s.getFineDustReading()*s.getSensorOpinion().getExpectation();
-				sensorsSquare += (Math.pow(s.getFineDustReading(),2))*s.getSensorOpinion().getExpectation();
+				sensorsSummation += s.getFineDustReading()[pos]*s.getSensorOpinion().getExpectation();
+				sensorsSquare += (Math.pow(s.getFineDustReading()[pos],2))*s.getSensorOpinion().getExpectation();
 				weightsSummation += s.getSensorOpinion().getExpectation();
 				SubjectiveOpinion serversOpinion = s.getSensorOpinion().discountBy(reputationList.get(s.getId()));
 				if(firstOpinion == null)
@@ -129,14 +140,19 @@ public class SensorsManager
 			cumuliativeResult = sensorsSummation/weightsSummation;
 			double meanOfSquaredValues  = sensorsSquare/weightsSummation;
 			double readingsDeviation = Math.sqrt(meanOfSquaredValues - (Math.pow(cumuliativeResult, 2)));
+			if(toGetCumulated.isEmpty())
+			{
+				//System.err.println(++err1);
+				return ;
+			}
 			SubjectiveOpinion cumulativeDecision = firstOpinion.fuse(toGetCumulated);
 
-			double readingUnaccruacy = updatedSensor.getFineDustReading()*(1-updatedSensor.getSensorOpinion().getExpectation());		
-			double [] readings = {updatedSensor.getFineDustReading(), 
-					updatedSensor.getFineDustReading()-readingUnaccruacy, 
-					updatedSensor.getFineDustReading()+readingUnaccruacy};
+			double readingUnaccruacy = updatedSensor.getFineDustReading()[pos]*(1-updatedSensor.getSensorOpinion().getExpectation());		
+			double [] readings = {updatedSensor.getFineDustReading()[pos], 
+					updatedSensor.getFineDustReading()[pos]-readingUnaccruacy, 
+					updatedSensor.getFineDustReading()[pos]+readingUnaccruacy};
 			double decisionWieght = -1.0;
-			boolean flag = false;
+			boolean flag = false; //evidence Against
 
 			// most trustworthyReading approach to eliminate the effect of the battery consumption
 			for (double reading: readings)
@@ -173,9 +189,13 @@ public class SensorsManager
 
 						if(decisionWieght == -1.0 || (!flag && decisionWieght>reading - 
 								(cumuliativeResult+readingsDeviation)))
-							decisionWieght = (cumuliativeResult-readingsDeviation) - reading;
+						{
+							decisionWieght = reading - (cumuliativeResult+readingsDeviation) ;
+						}
 				}
 			}
+			
+			//System.out.println(decisionWieght+" "+flag+" ");
 			
 			if(flag)
 				evidenceFor.put(updatedSensor.getId(), evidenceFor.get(updatedSensor.getId())+decisionWieght);
@@ -188,10 +208,15 @@ public class SensorsManager
 			double uncertainity = 2/(evidenceFor.get(updatedSensor.getId())
 					+evidenceAgainst.get(updatedSensor.getId())+2);
 			double atomicity = reputationList.get(updatedSensor.getId()).getAtomicity();
+			//System.out.println(evidenceFor.get(updatedSensor.getId())+" "+(evidenceFor.get(updatedSensor.getId())
+					//+" "+ evidenceAgainst.get(updatedSensor.getId())+" "+2)+ " hgruejhiwoere");
 			SubjectiveOpinion updatedReputation = new SubjectiveOpinion(belief,disbelief,uncertainity,atomicity);
 			updatedReputations.put(updatedSensor.getId(), updatedReputation);
 		}
-		reputationList = updatedReputations;
+		for (int sensor : updatedReputations.keySet())
+		{
+			reputationList.put(sensor, updatedReputations.get(sensor));			
+		}
 	}
 
 	private static double modelPredictionRoadLength(double ELEV, double COMM, double RES, double IND)
@@ -208,21 +233,16 @@ public class SensorsManager
 	
 	public static void SimulateDay()
 	{
+		for(int i=0;i<24;i++)
+		{
+			setAlarm(i);
+		}
 		
 	}
 
 	public static HashMap<Integer, Sensor> getSensorsList() {
 		return sensorsList;
 	}
-	
-	public static void printSensorList()
-	{
-		for (int s : sensorsList.keySet())
-		{
-			System.out.println(sensorsList.get(s).getId());			
-		}		
-	}
-
 
 
 }

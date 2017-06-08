@@ -9,6 +9,7 @@ import java.io.IOException;
 public class FileHandler extends Thread
 {
 	private File toBeRead ;
+	private static int count;
 
 	public FileHandler (File TBR)
 	{
@@ -23,17 +24,22 @@ public class FileHandler extends Thread
 			String line = br.readLine();
 			line = br.readLine();
 			String [] dataEntry = line.split(";");
+			boolean first = true;
+			if(toBeRead.getName().equals("download.py"))
+				return;
 			if(SensorsManager.getSensorsList().get(Integer.parseInt(dataEntry[0]))==null)
 			{
 				SensorsManager.registerSensor(Integer.parseInt(dataEntry[0]), Double.parseDouble(dataEntry[3]), Double.parseDouble(dataEntry[4]));
 			}
-			System.out.println(dataEntry[5].substring(11, 13));
 
 			do 
 			{
-												
+				dataEntry = line.split(";");
+				SensorsManager.recieveReading(Integer.parseInt(dataEntry[0]), Double.parseDouble(dataEntry[9]), Integer.parseInt(dataEntry[5].substring(11, 13)));
+
 			} while ((line= br.readLine())!=null);
-			
+			System.out.println(++count);
+
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

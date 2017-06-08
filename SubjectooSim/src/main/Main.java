@@ -48,11 +48,14 @@ public class Main
 			do
 			{
 				date = listOfFiles[i].getName().substring(0, 10);
+				//System.out.println(listOfFiles[i].getName().substring(0,10));
 				FileHandler fh = new FileHandler(listOfFiles[i]);
 				executor.submit(fh);				
-				i++;		
+				i++;	
+				//System.out.println(i<listOfFiles.length && listOfFiles[i].getName().substring(0,10).equals(date) );
 			}while(i<listOfFiles.length && listOfFiles[i].getName().substring(0,10).equals(date) );
 			try {
+				executor.shutdown();
 				executor.awaitTermination(1, TimeUnit.DAYS);
 				SensorsManager.SimulateDay();
 			} catch (InterruptedException e) {
