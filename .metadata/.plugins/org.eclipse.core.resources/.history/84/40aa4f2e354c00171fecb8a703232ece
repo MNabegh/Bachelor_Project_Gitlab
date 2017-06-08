@@ -1,0 +1,52 @@
+package main;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class FileHandler extends Thread
+{
+	private File toBeRead ;
+
+	public FileHandler (File TBR)
+	{
+		toBeRead = TBR;
+	}
+
+	public void run()
+	{
+		Sensor s = null ;
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(toBeRead));
+			String line = br.readLine();
+
+			while((line=br.readLine())!= null)
+			{
+				String [] dataEntry = line.split(";");
+				for (int i = 0; i < dataEntry.length; i++)
+				{
+					System.out.println(i+"- "+dataEntry[i]);					
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}
+
+
+// 0- sensor id
+// 1- sensor type
+// 2- sensor location
+// 3- latitude
+// 4- longitude 
+// 5- Time Stamp
+// 6- PM10 Reading
+// 7,8- Empty
+// 9- PM2.5 Reading

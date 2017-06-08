@@ -71,6 +71,7 @@ public class WorkerThreadPool {
 
     public static void main(String[] args) {
         ExecutorService executor = Executors.newFixedThreadPool(2);//two threads, try setting by 1 to observe time
+        int processors = Runtime.getRuntime().availableProcessors();
         System.out.println("Starting ...");
         long start = System.currentTimeMillis();
         Worker worker = new Worker();

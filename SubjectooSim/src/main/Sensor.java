@@ -7,7 +7,7 @@ public class Sensor
 {
 	private int id;
 	private double batteryLevel;
-	private double fineDustReading;
+	//private double fineDustReadings;
 	private SubjectiveOpinion sensorOpinion;
 	//private Date lastReadingStamp;
 	private String lastReadingStamp;
@@ -15,6 +15,7 @@ public class Sensor
 	private double yCoordinate;
 	private static double alpha = 0.75;
 	private boolean isActive;
+	private double [] fineDustReadings;
 
 
 	public Sensor()
@@ -27,6 +28,7 @@ public class Sensor
 		this.id = id;
 		this.xCoordinate = xCoordinate;
 		this.yCoordinate = yCoordinate;
+		fineDustReadings = new double[24];
 		//isActive = false;
 	}
 
@@ -36,10 +38,6 @@ public class Sensor
 
 	public void setBatteryLevel(double batteryLevel) {
 		this.batteryLevel = batteryLevel;
-	}
-
-	public void setFineDustReading(double fineDustReading) {
-		this.fineDustReading = fineDustReading;
 	}
 
 	public void setSensorOpinion(SubjectiveOpinion sensorOpinion) {
@@ -78,8 +76,12 @@ public class Sensor
 		return batteryLevel;
 	}
 
-	public double getFineDustReading() {
-		return fineDustReading;
+	public double[] getFineDustReading() {
+		return fineDustReadings;
+	}
+
+	public void setFineDustReading(double[] fineDustReadings) {
+		this.fineDustReadings = fineDustReadings;
 	}
 
 	public SubjectiveOpinion getSensorOpinion() {
@@ -103,7 +105,7 @@ public class Sensor
 		return isActive;
 	}
 
-	public void recieveReading (double batteryLevel, double fineDustReading, String timeStamp)
+	public void recieveReading (double batteryLevel, double fineDustReadings, int pos)
 	{
 		double beliefComponent = (batteryLevel/100)-(100*alpha/batteryLevel);
 		double disbeliefComponent = 1-beliefComponent; 
@@ -112,13 +114,13 @@ public class Sensor
 		if (sensorOpinion == null)
 		{
 			sensorOpinion = reading.discountBy(selfOpinion);
-			this.fineDustReading = fineDustReading;
+			this.fineDustReadings = fineDustReadings;
 		}
 		else
 		{
 			reading = reading.discountBy(selfOpinion);
-			this.fineDustReading = (this.fineDustReading*sensorOpinion.getExpectation()+
-					fineDustReading*reading.getExpectation())/(sensorOpinion.getExpectation()+reading.getExpectation());
+			this.fineDustReadings = (this.fineDustReadings*sensorOpinion.getExpectation()+
+					fineDustReadings*reading.getExpectation())/(sensorOpinion.getExpectation()+reading.getExpectation());
 			sensorOpinion = sensorOpinion.fuse(reading);			
 		}		
 		lastReadingStamp = timeStamp;

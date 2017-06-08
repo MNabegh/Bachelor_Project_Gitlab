@@ -14,15 +14,10 @@ public class SensorsManager
 	private static double PMThreshold = 7.2 ;
 	private static HashMap<Integer,Double> evidenceFor = new HashMap<Integer,Double>();
 	private static HashMap<Integer,Double> evidenceAgainst = new HashMap<Integer,Double>();
-
+	private static Object lock = new Object();
+	
 	public static void registerSensor(int id, double xCoordinate, double yCoordinate) throws Exception
-	{
-		Thread registerOperation = new Thread() 
-		{
-
-			@Override
-			public void run() 
-			{
+	{		
 				if(sensorsList.containsKey(id))
 				{
 					System.err.println("Already Exisisting Sensor");
@@ -31,18 +26,15 @@ public class SensorsManager
 				else
 				{
 					Sensor newSensor = new Sensor(id,xCoordinate,yCoordinate);
-					sensorsList.put(id, newSensor);
 					SubjectiveOpinion newOpinion = new SubjectiveOpinion(0,0,1,0.5);
-					reputationList.put(id, newOpinion);	
-					evidenceFor.put(id,0.0);
-					evidenceAgainst.put(id,0.0);
-
+					synchronized (lock)
+					{
+						sensorsList.put(id, newSensor);
+						reputationList.put(id, newOpinion);	
+						evidenceFor.put(id,0.0);
+						evidenceAgainst.put(id,0.0);
+					}
 				}
-
-			}
-		};
-
-		registerOperation.start();
 	}
 	
 	public static void recieveReading (int id, double fineDustReading, double batteryLevel, String timeStamp)
@@ -212,6 +204,23 @@ public class SensorsManager
 	{
 		// define units and revise COMM.300 AD.100 & RES.750
 		return 1.01 + AD * 0.002 - ELEV * 0.018 + COMM * 2.88 + RES * 0.025;
+	}
+	
+	public static void SimulateDay()
+	{
+		
+	}
+
+	public static HashMap<Integer, Sensor> getSensorsList() {
+		return sensorsList;
+	}
+	
+	public static void printSensorList()
+	{
+		for (int s : sensorsList.keySet())
+		{
+			System.out.println(sensorsList.get(s).getId());			
+		}		
 	}
 
 
