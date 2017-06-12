@@ -2,22 +2,23 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="isActive" key="selection"/>
+		<item value="System" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="true" key="wholeword"/>
 		<list key="findhistory">
+			<item value="system"/>
+			<item value="fineDustReading"/>
 			<item value="isActive"/>
 			<item value="Date"/>
 			<item value="clone"/>
 			<item value="copy"/>
 			<item value="toGetCumiliated"/>
 			<item value="conse"/>
-			<item value="trans"/>
-			<item value="public Subj"/>
 		</list>
 		<list key="replacehistory">
+			<item value="fineDustReadings"/>
 			<item value="toGetCumulated"/>
 			<item value="cumulative"/>
 		</list>
