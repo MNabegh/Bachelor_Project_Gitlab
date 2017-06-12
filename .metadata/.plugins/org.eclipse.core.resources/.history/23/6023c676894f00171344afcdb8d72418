@@ -69,9 +69,7 @@ public class Main
 				e.printStackTrace();
 			}
 			
-		}
-		
-		System.out.println(SensorsManager.reputationList.get(255));
+		}		
 	}
 	
 	

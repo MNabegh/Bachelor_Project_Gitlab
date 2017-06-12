@@ -219,7 +219,7 @@ public class SensorsManager
 					+evidenceAgainst.get(updatedSensor.getId())+2);
 			double atomicity = reputationList.get(updatedSensor.getId()).getAtomicity();
 			SubjectiveOpinion updatedReputation = new SubjectiveOpinion(belief,disbelief,uncertainity,atomicity);
-			writeTrustToCsvFile(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation);
+			writeCsvFile(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation);
 			updatedReputations.put(updatedSensor.getId(), updatedReputation);
 		}
 		for (int sensor : updatedReputations.keySet())
@@ -253,7 +253,7 @@ public class SensorsManager
 
 	public static HashMap<Integer, Sensor> getSensorsList() {return sensorsList;}
 
-	public static void writeTrustToCsvFile(String date, int pos, int id, double reading, SubjectiveOpinion opinion ) {
+	public static void writeCsvFile(String date, int pos, int id, double reading, SubjectiveOpinion opinion ) {
 
 		FileWriter fileWriter = null;
 

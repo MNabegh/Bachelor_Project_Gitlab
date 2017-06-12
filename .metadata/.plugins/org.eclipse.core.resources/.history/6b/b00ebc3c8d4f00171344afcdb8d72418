@@ -90,7 +90,7 @@ public class SensorsManager
 		}
 		SubjectiveOpinion finalDecision = firstOpinion.fuse(toGetCumulated);
 
-		updateReputations(date,pos);
+		updateReputations(pos);
 		nullifyAll(pos);
 
 		boolean alarm =PMThreshold<=finalReading;
@@ -112,7 +112,7 @@ public class SensorsManager
 
 	}
 
-	private static void updateReputations(String date, int pos) 
+	private static void updateReputations(int pos) 
 	{
 		HashMap<Integer, SubjectiveOpinion> updatedReputations= new HashMap<Integer,SubjectiveOpinion>();
 
@@ -219,7 +219,6 @@ public class SensorsManager
 					+evidenceAgainst.get(updatedSensor.getId())+2);
 			double atomicity = reputationList.get(updatedSensor.getId()).getAtomicity();
 			SubjectiveOpinion updatedReputation = new SubjectiveOpinion(belief,disbelief,uncertainity,atomicity);
-			writeTrustToCsvFile(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation);
 			updatedReputations.put(updatedSensor.getId(), updatedReputation);
 		}
 		for (int sensor : updatedReputations.keySet())
@@ -253,20 +252,19 @@ public class SensorsManager
 
 	public static HashMap<Integer, Sensor> getSensorsList() {return sensorsList;}
 
-	public static void writeTrustToCsvFile(String date, int pos, int id, double reading, SubjectiveOpinion opinion ) {
+	public static void writeCsvFile(String fileName,String date,int id, double reading, SubjectiveOpinion opinion ) {
 
 		FileWriter fileWriter = null;
 
 		try {
-			File file = new File("/home/nabegh/Bachelor/Results/Trust/"+id+".csv");
+			File file = new File(fileName);
 
 			if (!file.exists()) {
 				file.createNewFile();
-				fileWriter = new FileWriter(file.getAbsoluteFile(), true);
 				//Write the CSV file header
 				fileWriter.append(FILE_HEADER.toString());
 			}
-			else{ fileWriter = new FileWriter(file.getAbsoluteFile(), true);}
+			fileWriter = new FileWriter(file.getAbsoluteFile(), true);
 
 			
 
@@ -275,8 +273,6 @@ public class SensorsManager
 
 			//Write a new student object list to the CSV file
 			fileWriter.append(String.valueOf(date));
-			fileWriter.append(COMMA_DELIMITER);
-			fileWriter.append(String.valueOf(pos));
 			fileWriter.append(COMMA_DELIMITER);
 			fileWriter.append(String.valueOf(id));
 			fileWriter.append(COMMA_DELIMITER);
