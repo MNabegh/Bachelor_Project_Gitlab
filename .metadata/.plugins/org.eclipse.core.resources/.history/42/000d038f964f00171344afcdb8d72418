@@ -153,7 +153,6 @@ public class SensorsManager
 			cumuliativeResult = sensorsSummation/weightsSummation;
 			double meanOfSquaredValues  = sensorsSquare/weightsSummation;
 			double readingsDeviation = Math.sqrt(meanOfSquaredValues - (Math.pow(cumuliativeResult, 2)));
-			double multipliedreadingsDeviation = 1.5*readingsDeviation;
 			if(firstOpinion==null)
 				return;
 			if(toGetCumulated.isEmpty())
@@ -172,11 +171,11 @@ public class SensorsManager
 			{
 				if(reading<cumuliativeResult)
 				{
-					if(reading>cumuliativeResult-multipliedreadingsDeviation)
+					if(reading>cumuliativeResult-readingsDeviation)
 					{
-						if(!flag || (flag && decisionWieght<reading - (cumuliativeResult-multipliedreadingsDeviation)))
+						if(!flag || (flag && decisionWieght<reading - (cumuliativeResult-readingsDeviation)))
 						{
-							decisionWieght = reading - (cumuliativeResult-multipliedreadingsDeviation);
+							decisionWieght = reading - (cumuliativeResult-readingsDeviation);
 							flag = true;
 						}
 					}
@@ -184,16 +183,16 @@ public class SensorsManager
 					else
 
 						if(decisionWieght == -1.0 || (!flag && decisionWieght>(
-								cumuliativeResult-multipliedreadingsDeviation) - reading))
-							decisionWieght = (cumuliativeResult-multipliedreadingsDeviation) - reading;
+								cumuliativeResult-readingsDeviation) - reading))
+							decisionWieght = (cumuliativeResult-readingsDeviation) - reading;
 				}
 				else 
 				{
-					if(reading<cumuliativeResult+multipliedreadingsDeviation)
+					if(reading<cumuliativeResult+readingsDeviation)
 					{
-						if(!flag || (flag && decisionWieght<(cumuliativeResult+multipliedreadingsDeviation) - reading))
+						if(!flag || (flag && decisionWieght<(cumuliativeResult+readingsDeviation) - reading))
 						{
-							decisionWieght = (cumuliativeResult+multipliedreadingsDeviation) - reading;
+							decisionWieght = (cumuliativeResult+readingsDeviation) - reading;
 							flag = true;
 						}
 					}
@@ -201,9 +200,9 @@ public class SensorsManager
 					else
 
 						if(decisionWieght == -1.0 || (!flag && decisionWieght>reading - 
-								(cumuliativeResult+multipliedreadingsDeviation)))
+								(cumuliativeResult+readingsDeviation)))
 						{
-							decisionWieght = reading - (cumuliativeResult+multipliedreadingsDeviation) ;
+							decisionWieght = reading - (cumuliativeResult+readingsDeviation) ;
 						}
 				}
 			}

@@ -2,6 +2,7 @@ package main;
 
 import java.io.BufferedReader;
 import java.io.File;
+import org.apache.commons.io.FileUtils;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
@@ -10,25 +11,29 @@ import java.util.concurrent.TimeUnit;
 
 public class Main 
 {
-
+	
 	public static void main(String[] args)
 	{
-		File folder1 = new File("/home/nabegh/Bachelor/Results/Trust");
-		File[] files = folder1.listFiles();
-		for(File f: files)
-			f.delete();
-
+		FileUtils.cleanDirectory("/home/nabegh/Bachelor/Results/Trust");
+		File folder = new File("/home/nabegh/Bachelor/Results/Trust");
+		File[] files = folder.listFiles();
+		for(File f: files) {
+            if(f.isDirectory()) {
+                deleteFolder(f);
+            } else {
+                f.delete();
+            }
 		File folder = new File("/home/nabegh/Bachelor/FineDustMeasurementsNew"); // directory of the fine dust measurements
 		File[] listOfFiles = folder.listFiles(); // list of files in the directory
 		Arrays.sort(listOfFiles, new Comparator<File>()  // sorting the files by date
-				{
-
-			public int compare(File o1, File o2)
-			{
-				return o1.getName().compareTo(o2.getName());
-			}
-				});
-
+		{
+           
+            public int compare(File o1, File o2)
+            {
+            	return o1.getName().compareTo(o2.getName());
+            }
+		});
+		
 		/*FileHandler fh = new FileHandler(listOfFiles[0]);
 		fh.start();
 		try {
@@ -38,10 +43,10 @@ public class Main
 			e.printStackTrace();
 		}
 		SensorsManager.printSensorList();*/
-
+		
 		BufferedReader br = null;		
 		// jungingen 17:27 PM10 = 2 PM2.5 = 1
-
+		
 		int i=0;
 		while(i<listOfFiles.length) 
 		{			
@@ -70,15 +75,15 @@ public class Main
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
+			
 		}
-
+		
 		System.out.println(SensorsManager.reputationList.get(255));
 	}
+	
+	
 
-
-
-
+	
 
 
 }
