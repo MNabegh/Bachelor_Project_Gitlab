@@ -81,8 +81,7 @@ public class SensorsManager
 		if(toGetCumulated.isEmpty())
 		{
 			//System.err.println(++err);
-			return PMThreshold>=finalReading-finalReading*(1-firstOpinion.getExpectation()) &&
-					PMThreshold<=finalReading+finalReading*(1-firstOpinion.getExpectation());
+			return false;
 		}
 		SubjectiveOpinion finalDecision = firstOpinion.fuse(toGetCumulated);
 
