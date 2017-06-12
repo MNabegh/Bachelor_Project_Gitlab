@@ -16,9 +16,9 @@ public class Main
 	
 	public static void main(String[] args)
 	{
-		File folder = new File("/home/nabegh/Bachelor/FineDustMeasurementsNew");
-		File[] listOfFiles = folder.listFiles();
-		Arrays.sort(listOfFiles, new Comparator<File>() 
+		File folder = new File("/home/nabegh/Bachelor/FineDustMeasurementsNew"); // directory of the fine dust measurements
+		File[] listOfFiles = folder.listFiles(); // list of files in the directory
+		Arrays.sort(listOfFiles, new Comparator<File>()  // sorting the files by date
 		{
            
             public int compare(File o1, File o2)
@@ -44,20 +44,26 @@ public class Main
 		while(i<listOfFiles.length) 
 		{			
 			String date;
-			ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()+1);
+			ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()+1); 
+			/*if(!(listOfFiles[i].getName().substring(0, 10).equals("2017-01-26")))
+			{
+				i++;
+				continue;
+			}*/
 			do
 			{
-				date = listOfFiles[i].getName().substring(0, 10);
+				date = listOfFiles[i].getName().substring(0, 10); // take the date which is the first 9 characters of the file's name
 				//System.out.println(listOfFiles[i].getName().substring(0,10));
-				FileHandler fh = new FileHandler(listOfFiles[i]);
-				executor.submit(fh);				
-				i++;	
+				FileHandler fh = new FileHandler(listOfFiles[i]); // create a new filehandler thread
+				executor.submit(fh); // start the thread
+				i++; // go to the next file
 				//System.out.println(i<listOfFiles.length && listOfFiles[i].getName().substring(0,10).equals(date) );
-			}while(i<listOfFiles.length && listOfFiles[i].getName().substring(0,10).equals(date) );
+			}while(i<listOfFiles.length && listOfFiles[i].getName().substring(0,10).equals(date) ); // continue if there more files and the next one has the same date
 			try {
-				executor.shutdown();
-				executor.awaitTermination(1, TimeUnit.DAYS);
-				SensorsManager.SimulateDay();
+				executor.shutdown(); // stop accepting tasks
+				executor.awaitTermination(1, TimeUnit.DAYS); // wait until all the tasks are finished to continue
+				//System.out.println(date);
+				SensorsManager.SimulateDay(date); // start simulating the day
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
