@@ -40,20 +40,18 @@ public class Main
 				executor.submit(fh); // start the thread
 				i++;                                                                                // go to the next file
 			}while(i<listOfFiles.length && listOfFiles[i].getName().substring(0,10).equals(date) ); // continue if there more files and the next one has the same date
-			try 
-			{
-				executor.shutdown();                // stop accepting tasks
+			try {
+				executor.shutdown(); // stop accepting tasks
 				executor.awaitTermination(1, TimeUnit.DAYS); // wait until all the tasks are finished to continue
 				SensorsManager.SimulateDay(date); // start simulating the day
-			} 
-			catch (InterruptedException e) 
-			{
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
 		}
 
-		
+		//System.out.println(SensorsManager.reputationList.get(255));
 	}
 
 

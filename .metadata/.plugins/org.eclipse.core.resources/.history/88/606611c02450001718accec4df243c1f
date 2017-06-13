@@ -37,8 +37,8 @@ public class FileHandler extends Thread
 				// each line contatin a reading according to the index at the end of this file we can see what each position in the array is expected to present
 				
 
-			} while ((line= br.readLine())!=null); // looping on all of the lines in the file
-			
+			} while ((line= br.readLine())!=null);
+			//System.out.println(++count);
 
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
