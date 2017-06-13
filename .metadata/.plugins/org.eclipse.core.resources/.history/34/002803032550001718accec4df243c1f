@@ -107,20 +107,24 @@ public class Sensor
 		double beliefComponent = (batteryLevel/100.0)-(100.0*alpha/batteryLevel); // belief component of the self opinion of the reading created by the battery level
 		double disbeliefComponent = 1-beliefComponent; // disbelief component of tehe self opinion of the reading created by the battery level
 		SubjectiveOpinion selfOpinion = new SubjectiveOpinion(beliefComponent,disbeliefComponent,0); // creating the self opinion
-		SubjectiveOpinion reading = new SubjectiveOpinion(1,0,0); // the self opinion of the sensor about itself without adding the precision lost due to battery level		
-		if (sensorOpinion[pos] == null) // first reading of the hour
+		SubjectiveOpinion reading = new SubjectiveOpinion(1,0,0); // the self opinion of the sensor about itself without adding the precision lost due to battery level
+		synchronized (lock)
 		{
-			sensorOpinion[pos] = reading.discountBy(selfOpinion); // completing the self opinion by discounting the trust lost due to battery level
-			this.fineDustReadings[pos] = fineDustReading;  // saving the value
+			if (sensorOpinion[pos] == null) // first reading of the hour
+			{
+				sensorOpinion[pos] = reading.discountBy(selfOpinion); // completing the self opinion by discounting the trust lost due to battery level
+				this.fineDustReadings[pos] = fineDustReading;  // saving the value
+			}
+			else
+			{
+				reading = reading.discountBy(selfOpinion); // completing the self opinion by discounting the trust lost due to battery level
+				this.fineDustReadings[pos] = (this.fineDustReadings[pos]*sensorOpinion[pos].getExpectation()+
+						fineDustReading*reading.getExpectation())/(sensorOpinion[pos].getExpectation()+reading.getExpectation()); // cumulation of all the readings received for a whole hour 
+				sensorOpinion[pos] = sensorOpinion[pos].fuse(reading);	// cumulation of the self opinions received during the last hour 
+			}		
+			//lastReadingStamp = timeStamp;
+			//isActive = true;
 		}
-		else
-		{
-			reading = reading.discountBy(selfOpinion); // completing the self opinion by discounting the trust lost due to battery level
-			this.fineDustReadings[pos] = (this.fineDustReadings[pos]*sensorOpinion[pos].getExpectation()+
-					fineDustReading*reading.getExpectation())/(sensorOpinion[pos].getExpectation()+reading.getExpectation()); // cumulation of all the readings received for a whole hour 
-			sensorOpinion[pos] = sensorOpinion[pos].fuse(reading);	// cumulation of the self opinions received during the last hour 
-		}		
-
 	}
 
 }
