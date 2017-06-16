@@ -9,7 +9,7 @@ import java.io.IOException;
 public class FileHandler extends Thread
 {
 	private File toBeRead ;
-	private static int count;
+	private BufferedReader br;
 
 	public FileHandler (File TBR)
 	{
@@ -18,9 +18,8 @@ public class FileHandler extends Thread
 
 	public void run()
 	{
-		Sensor s = null ;
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(toBeRead));   // create a buffered reader for the input csv file
+			br = new BufferedReader(new FileReader(toBeRead));
 			String line = br.readLine(); // the first line contains the titles of each columns we do not need it
 			line = br.readLine();  // read the second line which is the first line of important data
 			String [] dataEntry = line.split(";"); 

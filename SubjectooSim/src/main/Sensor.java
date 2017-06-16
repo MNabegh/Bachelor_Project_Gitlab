@@ -1,6 +1,5 @@
 package main;
 
-import java.util.Date;
 import no.uio.subjective_logic.opinion.SubjectiveOpinion;
 
 public class Sensor 
@@ -16,7 +15,6 @@ public class Sensor
 	private static double alpha = 0.125;
 	private double [] fineDustReadings;
 	private SubjectiveOpinion [] sensorOpinion;
-	private Object lock = new Object();
 
 
 	public Sensor()
