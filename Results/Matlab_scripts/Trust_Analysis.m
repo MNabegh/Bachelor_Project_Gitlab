@@ -2,6 +2,8 @@ clc
 clear all 
 close all
 
+
+
 sensor = "255";
 
 Trust = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/",sensor,".csv"),1,4,[1 4 2223 4]);
@@ -9,6 +11,8 @@ SensorReading = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/",sensor,".c
 finalReading = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/",sensor,".csv"),1,9,[1 9 2223 9]);
 
 range = [1:2223];
+
+hold on
 
 Trust=transpose(Trust);
 SensorReading = transpose(SensorReading);

@@ -47,9 +47,9 @@ public class SensorsManager
 		}
 	}
 
-	public static void recieveReading (int id, double fineDustReading, int pos)
+	public static void recieveReading (int id, double fineDustReading, int pos, double x, double y)
 	{
-		sensorsList.get(id).recieveReading(fineDustReading, pos);
+		sensorsList.get(id).recieveReading(fineDustReading, pos,x,y);
 	}
 
 	public static boolean setAlarm(int pos, String date)
@@ -212,6 +212,7 @@ public class SensorsManager
 			double atomicity = reputationList.get(updatedSensor.getId()).getAtomicity();
 			SubjectiveOpinion updatedReputation = new SubjectiveOpinion(belief,disbelief,uncertainity,atomicity);
 			writeTrustToCsvFile(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation, finalReading);
+			writeTrustToCsvFileD(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation, finalReading);
 			updatedReputations.put(updatedSensor.getId(), updatedReputation);
 		}
 		for (int sensor : updatedReputations.keySet())
@@ -267,7 +268,71 @@ public class SensorsManager
 			fileWriter.append(NEW_LINE_SEPARATOR);
 
 			//Write a new student object list to the CSV file
-			fileWriter.append(String.valueOf(date));
+			fileWriter.append(date.substring(0,4)+date.substring(5,7)+date.substring(8));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(String.valueOf(pos));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(String.valueOf(id));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+reading);
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getBelief());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getDisbelief());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getUncertainty());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getAtomicity());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getExpectation());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+finalReading);
+
+
+
+
+
+			//System.out.println("CSV file was created successfully !!!");
+
+		} catch (Exception e) {
+			System.out.println("Error in CsvFileWriter !!!");
+			e.printStackTrace();
+		} finally {
+
+			try {
+				fileWriter.flush();
+				fileWriter.close();
+			} catch (IOException e) {
+				System.out.println("Error while flushing/closing fileWriter !!!");
+				e.printStackTrace();
+			}
+
+		}
+	}
+	
+	private static void writeTrustToCsvFileD(String date, int pos, int id, double reading, SubjectiveOpinion opinion, double finalReading ) {
+
+		FileWriter fileWriter = null;
+
+		try {
+			File file = new File("/home/nabegh/Bachelor/Results/Trust/"+date+".csv");
+
+			if (!file.exists()) 
+			{
+				file.createNewFile();
+				fileWriter = new FileWriter(file.getAbsoluteFile(), true);
+				//Write the CSV file header
+				fileWriter.append(FILE_HEADER.toString());
+			}
+			else{ fileWriter = new FileWriter(file.getAbsoluteFile(), true);}
+
+
+
+			//Add a new line separator after the header
+			fileWriter.append(NEW_LINE_SEPARATOR);
+
+			//Write a new student object list to the CSV file
+			fileWriter.append(date.substring(0,4)+date.substring(5,7)+date.substring(8));
 			fileWriter.append(COMMA_DELIMITER);
 			fileWriter.append(String.valueOf(pos));
 			fileWriter.append(COMMA_DELIMITER);
@@ -329,7 +394,7 @@ public class SensorsManager
 			fileWriter.append(NEW_LINE_SEPARATOR);
 			
 			//Write a new student object list to the CSV file
-			fileWriter.append(String.valueOf(date));
+			fileWriter.append(date.substring(0,4)+date.substring(5,7)+date.substring(8));
 			fileWriter.append(COMMA_DELIMITER);
 			fileWriter.append(String.valueOf(pos));
 			fileWriter.append(COMMA_DELIMITER);

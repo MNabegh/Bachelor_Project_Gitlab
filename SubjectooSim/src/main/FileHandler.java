@@ -32,7 +32,7 @@ public class FileHandler extends Thread
 			do 
 			{
 				dataEntry = line.split(";"); // except for the first line every new line will come from the loop condition and have not been split before
-				SensorsManager.recieveReading(Integer.parseInt(dataEntry[0]), Double.parseDouble(dataEntry[9]), Integer.parseInt(dataEntry[5].substring(11, 13))); 
+				SensorsManager.recieveReading(Integer.parseInt(dataEntry[0]), Double.parseDouble(dataEntry[9]), Integer.parseInt(dataEntry[5].substring(11, 13)),Double.parseDouble(dataEntry[3]),Double.parseDouble(dataEntry[4])); 
 				// each line contatin a reading according to the index at the end of this file we can see what each position in the array is expected to present
 				
 
