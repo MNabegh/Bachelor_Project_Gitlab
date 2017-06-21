@@ -10,7 +10,7 @@ Trust = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/",sensor,".csv"),1,4
 SensorReading = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/",sensor,".csv"),1,3,[1 3 2223 3]);
 finalReading = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/",sensor,".csv"),1,9,[1 9 2223 9]);
 
-range = [1:2223];
+range = [1:200];
 
 hold on
 

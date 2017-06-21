@@ -17,8 +17,8 @@ public class Main
 		for(File f: files)
 			f.delete();
 		
-		File file = new File("/home/nabegh/Bachelor/Results/FinalDecision/FinalDecision.csv");
-		if(file.exists())
+		File file = new File("/home/nabegh/Bachelor/Results/FinalDecisionAttacker/FinalDecision.csv");
+		if(file.exists() && file.getName()!="255.csv")
 			file.delete();
 
 		File folder = new File("/home/nabegh/Bachelor/FineDustMeasurementsNew"); // directory of the fine dust measurements
@@ -57,7 +57,7 @@ public class Main
 
 		}
 		
-		SensorsManager.printX();
+		//SensorsManager.printX();
 		
 	}
 

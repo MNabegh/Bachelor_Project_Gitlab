@@ -67,6 +67,9 @@ public class SensorsManager
 
 			if(s.getSensorOpinion()[pos]== null)
 				continue;
+			
+			if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5)
+				continue;
 
 			sensorsSummation += s.getFineDustReading()[pos]*s.getSensorOpinion()[pos].getExpectation();
 			weightsSummation += s.getSensorOpinion()[pos].getExpectation();
@@ -129,6 +132,9 @@ public class SensorsManager
 
 				if(s.getSensorOpinion()[pos]== null)
 					continue;
+				
+				if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5 )
+					continue;
 
 				sensorsSummation += s.getFineDustReading()[pos]*s.getSensorOpinion()[pos].getExpectation();
 				sensorsSquare += (Math.pow(s.getFineDustReading()[pos],2))*s.getSensorOpinion()[pos].getExpectation();
@@ -144,7 +150,9 @@ public class SensorsManager
 			cumuliativeResult = sensorsSummation/weightsSummation;
 			double meanOfSquaredValues  = sensorsSquare/weightsSummation;
 			double readingsDeviation = Math.sqrt(meanOfSquaredValues - (Math.pow(cumuliativeResult, 2)));
-			double multipliedreadingsDeviation = 1.5*readingsDeviation;
+			double incTrustMlutiplier = 1.5;
+			double multiplier = 1.8;
+			double multipliedreadingsDeviation =  multiplier*readingsDeviation;
 			if(firstOpinion==null)
 				return;
 			if(toGetCumulated.isEmpty())
@@ -200,7 +208,7 @@ public class SensorsManager
 			}
 
 			if(flag)
-				evidenceFor.put(updatedSensor.getId(), evidenceFor.get(updatedSensor.getId())+decisionWieght);
+				evidenceFor.put(updatedSensor.getId(), evidenceFor.get(updatedSensor.getId())+decisionWieght*incTrustMlutiplier);
 			else
 				evidenceAgainst.put(updatedSensor.getId(), evidenceAgainst.get(updatedSensor.getId())+decisionWieght);
 			double belief = evidenceFor.get(updatedSensor.getId())/(evidenceFor.get(updatedSensor.getId())
@@ -251,7 +259,11 @@ public class SensorsManager
 		FileWriter fileWriter = null;
 
 		try {
-			File file = new File("/home/nabegh/Bachelor/Results/Trust/"+id+".csv");
+			File file = null;
+			if(id == 255)
+				file= new File("/home/nabegh/Bachelor/Results/Trust/"+id+"attack.csv");
+			else
+				file= new File("/home/nabegh/Bachelor/Results/Trust/"+id+".csv");
 
 			if (!file.exists()) 
 			{
@@ -379,7 +391,7 @@ public class SensorsManager
 		FileWriter fileWriter = null;
 		
 		try{
-			File file = new File("/home/nabegh/Bachelor/Results/FinalDecision/FinalDecision.csv");
+			File file = new File("/home/nabegh/Bachelor/Results/FinalDecisionAttacker/FinalDecision.csv");
 			if (!file.exists()) 
 			{
 				file.createNewFile();

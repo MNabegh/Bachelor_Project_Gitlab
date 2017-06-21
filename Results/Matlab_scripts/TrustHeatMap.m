@@ -6,7 +6,7 @@ sensor = "255";
 
 
 
-Sensor255 = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/255.csv"),2295,4,[2295 4 2295 4]);
+Sensor255 = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/255attack.csv"),2295,4,[2295 4 2295 4]);
 Sensor1002 = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/1002.csv"),2108,4,[2108 4 2108 4]);
 Sensor1178 = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/1178.csv"),2105,4,[2105 4 2105 4]);
 Sensor1098 = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/1098.csv"),2219,4,[2219 4 2219 4]);
