@@ -1,0 +1,22 @@
+package main;
+
+
+import java.util.HashMap;
+
+public class AttackScenario 
+{
+	private static HashMap<Integer,AttackerType> attackers ;
+	private static HashMap<String,Integer> attackSchedule;
+	private static int constInc;
+	private static int constDec;
+	
+	public static void setAttackers (HashMap<Integer, AttackerType> attackers)
+	{
+		AttackScenario.attackers = attackers ;		
+	}
+	
+	public static void checkForAttack (String date, int pos)
+	{
+		
+	}
+}

@@ -15,10 +15,11 @@ public class Main
 		File folder1 = new File("/home/nabegh/Bachelor/Results/Trust");
 		File[] files = folder1.listFiles();
 		for(File f: files)
-			f.delete();
-		
-		File file = new File("/home/nabegh/Bachelor/Results/FinalDecisionAttacker/FinalDecision.csv");
-		if(file.exists() && file.getName()!="255.csv")
+			if( f.getName()!= "1098.csv")
+				f.delete();
+
+		File file = new File("/home/nabegh/Bachelor/Results/FinalDecision/FinalDecision.csv");
+		if(file.exists())
 			file.delete();
 
 		File folder = new File("/home/nabegh/Bachelor/FineDustMeasurementsNew"); // directory of the fine dust measurements
@@ -56,9 +57,7 @@ public class Main
 			}
 
 		}
-		
-		//SensorsManager.printX();
-		
+
 	}
 
 

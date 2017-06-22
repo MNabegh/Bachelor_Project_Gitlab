@@ -2,7 +2,7 @@ import requests
 import shutil
 
 days = range(1,32)
-months = range(1,7)
+months = range(4,7)
 years = [2017]
 sensors = [1002, 1178, 1098, 2394,255,481,1973,1286,1462,2630,3323]
 

@@ -105,11 +105,11 @@ public class Sensor
 	{
 		if(this.xCoordinate!=xCoordinate || this.yCoordinate!=yCoordinate)
 			System.out.println(this.id+" Changed position");
-		if(id == 255)
+		/*if(id == 255)
 		{
 			Random r = new Random();
 			fineDustReading = fineDustReading+2000;
-		}
+		}*/
 		double batteryLevel = 100.0; // we do not have battery raedings
 		double beliefComponent = (batteryLevel/100.0)-(100.0*alpha/batteryLevel); // belief component of the self opinion of the reading created by the battery level
 		double disbeliefComponent = 1-beliefComponent; // disbelief component of tehe self opinion of the reading created by the battery level
