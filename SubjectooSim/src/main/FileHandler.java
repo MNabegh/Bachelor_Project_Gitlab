@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class FileHandler extends Thread
 {
@@ -18,6 +19,7 @@ public class FileHandler extends Thread
 
 	public void run()
 	{
+		
 		try {
 			br = new BufferedReader(new FileReader(toBeRead));
 			String line = br.readLine(); // the first line contains the titles of each columns we do not need it
@@ -46,14 +48,15 @@ public class FileHandler extends Thread
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NumberFormatException e) {
-			System.out.println(toBeRead.getName());
 			// TODO Auto-generated catch block
+			System.out.println(toBeRead.getName());
 			e.printStackTrace();
 		} catch (Exception e) {
 			//System.out.println(toBeRead.getName());
 			e.printStackTrace();
 		}
 	}
+	
 }
 
 

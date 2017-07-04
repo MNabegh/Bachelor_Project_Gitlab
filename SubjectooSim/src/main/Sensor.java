@@ -8,15 +8,13 @@ public class Sensor
 {
 	private int id;
 	private double batteryLevel;
-	//private double fineDustReadings;
-	//private SubjectiveOpinion sensorOpinion;
-	//private Date lastReadingStamp;
 	private String lastReadingStamp;
 	private double xCoordinate;
 	private double yCoordinate;
 	private static double alpha = 0.125;
 	private double [] fineDustReadings;
 	private SubjectiveOpinion [] sensorOpinion;
+	private int  sensorCounter = 0;
 
 
 	public Sensor()
@@ -105,11 +103,6 @@ public class Sensor
 	{
 		if(this.xCoordinate!=xCoordinate || this.yCoordinate!=yCoordinate)
 			System.out.println(this.id+" Changed position");
-		/*if(id == 255)
-		{
-			Random r = new Random();
-			fineDustReading = fineDustReading+2000;
-		}*/
 		
 		double batteryLevel = 100.0; // we do not have battery raedings
 		double beliefComponent = (batteryLevel/100.0)-(100.0*alpha/batteryLevel); // belief component of the self opinion of the reading created by the battery level

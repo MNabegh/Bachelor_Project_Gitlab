@@ -3,6 +3,7 @@ package main;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.KeyStore.PasswordProtection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -19,7 +20,6 @@ public class SensorsManager
 	private static HashMap<Integer,Double> evidenceAgainst = new HashMap<Integer,Double>();
 	private static Object lock = new Object();
 	private static double decayFactor = 0.975;
-	private static int countHours = 0; 
 
 	//Delimiter used in CSV file
 	private static final String COMMA_DELIMITER = ",";
@@ -28,6 +28,12 @@ public class SensorsManager
 	//CSV file header
 	private static final String FILE_HEADER = "day,hour,SensorID,reading,belief,disbelief,uncertainity,atomicity,expectation,final Reading";
 	private static final String FILE_HEADER_2 = "day,hour,Final Reading, belief,disbelief,uncertainity,atomicity,expectation";
+
+	//Testing
+	private static ArrayList<Integer> Participation = new ArrayList<Integer>();
+	private static int countHours = 0; 
+	private static boolean lastSensor = false;
+	private static boolean attack = false;
 
 	public static void registerSensor(int id, double xCoordinate, double yCoordinate) throws Exception
 	{		
@@ -41,6 +47,8 @@ public class SensorsManager
 			SubjectiveOpinion [] array = new SubjectiveOpinion[24];
 			Sensor newSensor = new Sensor(id,xCoordinate,yCoordinate,array);
 			SubjectiveOpinion newOpinion = new SubjectiveOpinion(0,0,1,0.5);
+			if(id==3323)
+				lastSensor=true;
 			synchronized (lock)
 			{
 				sensorsList.put(id, newSensor);
@@ -55,7 +63,7 @@ public class SensorsManager
 	{
 		sensorsList.get(id).recieveReading(fineDustReading, pos,x,y);
 	}
-	
+
 	public static int getCountHours()
 	{
 		return countHours;
@@ -68,7 +76,6 @@ public class SensorsManager
 		double weightsSummation = 0.0;
 		//SubjectiveOpinion firstOpinion = null;
 		ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
-		 countHours++;
 
 
 
@@ -80,14 +87,17 @@ public class SensorsManager
 
 			if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5)
 				continue;
-			
+
 			//-------------Attack------------------------------			
-			if(countHours>100 &&s.getId()==1098)
+			if(lastSensor &&  Participation.contains(s.getId()) && countHours++ >50 )
 			{
+				attack=true;
 				Random r = new Random();
-				s.getFineDustReading()[pos]=r.nextInt(50);
+				s.getFineDustReading()[pos]=s.getFineDustReading()[pos]+5;
+				//System.out.println(date+" "+pos);
 			}
 			//-------------Attack-------------------------------
+
 
 			sensorsSummation += s.getFineDustReading()[pos]*s.getSensorOpinion()[pos].getExpectation();
 			weightsSummation += s.getSensorOpinion()[pos].getExpectation();
@@ -108,10 +118,15 @@ public class SensorsManager
 		nullifyAll(pos);
 
 		boolean alarm =PMThreshold<=finalReading;
-		writeFinalDecisionToCsvFile(date, pos, finalReading, finalDecision);
+		if(attack)
+			writeFinalDecisionToCsvFile(date, pos, finalReading, finalDecision);
 
 		return PMThreshold<=finalReading;
 
+	}
+
+	public static ArrayList<Integer> getParticipation() {
+		return Participation;
 	}
 
 	private static void nullifyAll(int pos)
@@ -143,6 +158,7 @@ public class SensorsManager
 			double weightsSummation = 0.0;
 			SubjectiveOpinion firstOpinion = null;
 			ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
+			
 			for(Sensor s: sensorsList.values())
 			{
 				if(updatedSensor == s)
@@ -168,8 +184,8 @@ public class SensorsManager
 			cumuliativeResult = sensorsSummation/weightsSummation;
 			double meanOfSquaredValues  = sensorsSquare/weightsSummation;
 			double readingsDeviation = Math.sqrt(meanOfSquaredValues - (Math.pow(cumuliativeResult, 2)));
-			double incTrustMlutiplier = 1.5;
-			double multiplier = 1.8;
+			double incTrustMlutiplier = 1.0;
+			double multiplier = 1.5;
 			double multipliedreadingsDeviation =  multiplier*readingsDeviation;
 			if(firstOpinion==null)
 				return;
@@ -235,7 +251,7 @@ public class SensorsManager
 			{
 				evidenceAgainst.put(updatedSensor.getId(), evidenceAgainst.get(updatedSensor.getId())*decayFactor+decisionWieght);
 				evidenceFor.put(updatedSensor.getId(), evidenceFor.get(updatedSensor.getId())*decayFactor+0);
-				
+
 			}
 			double belief = evidenceFor.get(updatedSensor.getId())/(evidenceFor.get(updatedSensor.getId())
 					+evidenceAgainst.get(updatedSensor.getId())+2);
@@ -253,19 +269,6 @@ public class SensorsManager
 		{
 			reputationList.put(sensor, updatedReputations.get(sensor));			
 		}
-	}
-
-
-	private static double modelPredictionRoadLength(double ELEV, double COMM, double RES, double IND)
-	{
-		// define units and revise COMM.300 RES.750 & IND.300
-		return 0.036- ELEV*0.019 + COMM * 2.58 + RES * 0.035 + IND * 0.319;				
-	}
-
-	private static double modelPredictionVeichleDensity(double AD, double ELEV, double COMM, double RES)
-	{
-		// define units and revise COMM.300 AD.100 & RES.750
-		return 1.01 + AD * 0.002 - ELEV * 0.018 + COMM * 2.88 + RES * 0.025;
 	}
 
 	public static void SimulateDay(String date)
@@ -417,7 +420,7 @@ public class SensorsManager
 		FileWriter fileWriter = null;
 
 		try{
-			File file = new File("/home/nabegh/Bachelor/Results/FinalDecision/FinalDecision.csv");
+			File file = new File("/home/nabegh/Bachelor/Results/FinalDecision/FinalDecision1_11.csv");
 			if (!file.exists()) 
 			{
 				file.createNewFile();
