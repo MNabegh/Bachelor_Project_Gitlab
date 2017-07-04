@@ -23,7 +23,7 @@ public class FileHandler extends Thread
 			String line = br.readLine(); // the first line contains the titles of each columns we do not need it
 			line = br.readLine();  // read the second line which is the first line of important data
 			String [] dataEntry = line.split(";"); 
-			if(toBeRead.getName().equals("download.py")) // this file should not be read as it contains no data but it exists in the same directory
+			if(toBeRead.getName().startsWith("download.py")) // this file should not be read as it contains no data but it exists in the same directory
 				return;
 			if(SensorsManager.getSensorsList().get(Integer.parseInt(dataEntry[0]))==null) // get the sensor ID and check if it's registered or is it the first time to have an input file
 				SensorsManager.registerSensor(Integer.parseInt(dataEntry[0]), Double.parseDouble(dataEntry[3]), Double.parseDouble(dataEntry[4])); // if not registered perform the registration operation 
@@ -46,6 +46,7 @@ public class FileHandler extends Thread
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NumberFormatException e) {
+			System.out.println(toBeRead.getName());
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (Exception e) {

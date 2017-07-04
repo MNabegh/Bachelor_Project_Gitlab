@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import no.uio.subjective_logic.opinion.SubjectiveOpinion;
 
@@ -17,6 +18,9 @@ public class SensorsManager
 	private static HashMap<Integer,Double> evidenceFor = new HashMap<Integer,Double>();
 	private static HashMap<Integer,Double> evidenceAgainst = new HashMap<Integer,Double>();
 	private static Object lock = new Object();
+	private static double decayFactor = 0.975;
+	private static int countHours = 0; 
+
 	//Delimiter used in CSV file
 	private static final String COMMA_DELIMITER = ",";
 	private static final String NEW_LINE_SEPARATOR = "\n";
@@ -51,6 +55,11 @@ public class SensorsManager
 	{
 		sensorsList.get(id).recieveReading(fineDustReading, pos,x,y);
 	}
+	
+	public static int getCountHours()
+	{
+		return countHours;
+	}
 
 	public static boolean setAlarm(int pos, String date)
 	{
@@ -59,6 +68,7 @@ public class SensorsManager
 		double weightsSummation = 0.0;
 		//SubjectiveOpinion firstOpinion = null;
 		ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
+		 countHours++;
 
 
 
@@ -67,9 +77,17 @@ public class SensorsManager
 
 			if(s.getSensorOpinion()[pos]== null)
 				continue;
-			
+
 			if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5)
 				continue;
+			
+			//-------------Attack------------------------------			
+			if(countHours>100 &&s.getId()==1098)
+			{
+				Random r = new Random();
+				s.getFineDustReading()[pos]=r.nextInt(50);
+			}
+			//-------------Attack-------------------------------
 
 			sensorsSummation += s.getFineDustReading()[pos]*s.getSensorOpinion()[pos].getExpectation();
 			weightsSummation += s.getSensorOpinion()[pos].getExpectation();
@@ -132,7 +150,7 @@ public class SensorsManager
 
 				if(s.getSensorOpinion()[pos]== null)
 					continue;
-				
+
 				if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5 )
 					continue;
 
@@ -208,9 +226,17 @@ public class SensorsManager
 			}
 
 			if(flag)
-				evidenceFor.put(updatedSensor.getId(), evidenceFor.get(updatedSensor.getId())+decisionWieght*incTrustMlutiplier);
+			{
+				evidenceFor.put(updatedSensor.getId(), evidenceFor.get(updatedSensor.getId())*decayFactor+decisionWieght*incTrustMlutiplier);
+				evidenceAgainst.put(updatedSensor.getId(), evidenceAgainst.get(updatedSensor.getId())*decayFactor+0);
+
+			}
 			else
-				evidenceAgainst.put(updatedSensor.getId(), evidenceAgainst.get(updatedSensor.getId())+decisionWieght);
+			{
+				evidenceAgainst.put(updatedSensor.getId(), evidenceAgainst.get(updatedSensor.getId())*decayFactor+decisionWieght);
+				evidenceFor.put(updatedSensor.getId(), evidenceFor.get(updatedSensor.getId())*decayFactor+0);
+				
+			}
 			double belief = evidenceFor.get(updatedSensor.getId())/(evidenceFor.get(updatedSensor.getId())
 					+evidenceAgainst.get(updatedSensor.getId())+2);
 			double disbelief = evidenceAgainst.get(updatedSensor.getId())/(evidenceFor.get(updatedSensor.getId())
@@ -260,7 +286,10 @@ public class SensorsManager
 
 		try {
 			File file = null;
-			file= new File("/home/nabegh/Bachelor/Results/Trust/"+id+".csv");
+			if(id!=1098)
+				file= new File("/home/nabegh/Bachelor/Results/Trust/"+id+".csv");
+			else
+				file = new File("/home/nabegh/Bachelor/Results/Trust/"+id+"attack.csv");
 
 			if (!file.exists()) 
 			{
@@ -318,7 +347,7 @@ public class SensorsManager
 
 		}
 	}
-	
+
 	private static void writeTrustToCsvFileD(String date, int pos, int id, double reading, SubjectiveOpinion opinion, double finalReading ) {
 
 		FileWriter fileWriter = null;
@@ -386,7 +415,7 @@ public class SensorsManager
 	private static void writeFinalDecisionToCsvFile(String date, int pos, double finalReading, SubjectiveOpinion opinion)
 	{
 		FileWriter fileWriter = null;
-		
+
 		try{
 			File file = new File("/home/nabegh/Bachelor/Results/FinalDecision/FinalDecision.csv");
 			if (!file.exists()) 
@@ -396,12 +425,12 @@ public class SensorsManager
 				//Write the CSV file header
 				fileWriter.append(FILE_HEADER_2.toString());
 			}
-			
+
 			else{ fileWriter = new FileWriter(file.getAbsoluteFile(), true);}
-			
+
 			//Add a new line separator after the header
 			fileWriter.append(NEW_LINE_SEPARATOR);
-			
+
 			//Write a new student object list to the CSV file
 			fileWriter.append(date.substring(0,4)+date.substring(5,7)+date.substring(8));
 			fileWriter.append(COMMA_DELIMITER);
@@ -450,7 +479,7 @@ public class SensorsManager
 		System.out.println(IDs+"]");
 		System.out.println(X+"]");
 		System.out.println(Y+"]");
-		
+
 	}
 
 
