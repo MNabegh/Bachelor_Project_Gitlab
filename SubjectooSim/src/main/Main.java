@@ -12,21 +12,49 @@ public class Main
 
 	public static void main(String[] args)
 	{
-		File folder1 = new File("/home/nabegh/Bachelor/Results/Trust");
-		File[] files = folder1.listFiles();
-		for(File f: files)
-				f.delete();
+		double  d = 0.9;
+		int  add = 200;;
+		int j = 6;
+		boolean first = true;
+		SensorsManager.setDecayFactor(d);
+		SensorsManager.setAddedValue(add);
+		SensorsManager.setFirst(first);
+		String type = "/Decay_"+d;
+		if(first)
+			type+="/First";
+		if(add==-1)
+			type+="/Random-Constant";
+		else
+			type+="/Clever-Constant_+"+add;
+		run(type, j);				
 
-		File file = new File("/home/nabegh/Bachelor/Results/FinalDecision/FinalDecision1_11.csv");
+
+	}
+
+	public static void run(String first,int j)
+	{
+		File directory = new File("/home/nabegh/Bachelor/Results/FinalDecision/"+first);
+		if(!directory.exists())
+		{
+			directory.mkdirs();	
+		}
+		String dir = directory+"/FinalDecision"+j+"_11.csv";
+		SensorsManager.setDirectory(dir);
+		File file = new File(dir);
 		if(file.exists())
 			file.delete();
-		
+
 		SensorsManager.getParticipation().add(1098);
-		//SensorsManager.getParticipation().add(3323);
-		//SensorsManager.getParticipation().add(2394);
-		//SensorsManager.getParticipation().add(2630);
-		//SensorsManager.getParticipation().add(1178);
-		//SensorsManager.getParticipation().add(481);
+		if(j>1)
+			SensorsManager.getParticipation().add(3323);
+		if(j>2)
+			SensorsManager.getParticipation().add(2394);
+		if(j>3)
+			SensorsManager.getParticipation().add(2630);
+		if(j>4)
+			SensorsManager.getParticipation().add(1178);
+		if(j>5)
+			SensorsManager.getParticipation().add(481);
 
 		File folder = new File("/home/nabegh/Bachelor/FineDustMeasurementsNew"); // directory of the fine dust measurements
 		File[] listOfFiles = folder.listFiles(); // list of files in the directory

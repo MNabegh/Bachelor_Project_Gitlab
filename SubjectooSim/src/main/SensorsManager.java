@@ -3,7 +3,6 @@ package main;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.security.KeyStore.PasswordProtection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -34,6 +33,26 @@ public class SensorsManager
 	private static int countHours = 0; 
 	private static boolean lastSensor = false;
 	private static boolean attack = false;
+	private static String directory ;
+	private static boolean first ;
+	private static int addedValue;
+
+	public static boolean isFirst()
+	{
+		return first;
+	}
+
+	public static void setFirst(boolean first) {
+		SensorsManager.first = first;
+	}
+
+	public static String getDirectory() {
+		return directory;
+	}
+
+	public static void setDirectory(String directory) {
+		SensorsManager.directory = directory;
+	}
 
 	public static void registerSensor(int id, double xCoordinate, double yCoordinate) throws Exception
 	{		
@@ -74,7 +93,6 @@ public class SensorsManager
 		double finalReading = 0.0 ;
 		double sensorsSummation = 0.0;
 		double weightsSummation = 0.0;
-		//SubjectiveOpinion firstOpinion = null;
 		ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
 
 
@@ -87,16 +105,21 @@ public class SensorsManager
 
 			if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5)
 				continue;
-
-			//-------------Attack------------------------------			
-			if(lastSensor &&  Participation.contains(s.getId()) && countHours++ >50 )
+			
+			if(s.getId()==3323)
+				countHours++;
+			//-------------Attack------------------------------------------------------------------------------------------------------------		
+			if(lastSensor &&  Participation.contains(s.getId()) && countHours >50 )
 			{
 				attack=true;
 				Random r = new Random();
-				s.getFineDustReading()[pos]=s.getFineDustReading()[pos]+5;
+				if(addedValue==-1)
+					s.getFineDustReading()[pos]=r.nextInt(51);
+				else
+					s.getFineDustReading()[pos]=s.getFineDustReading()[pos]+addedValue;
 				//System.out.println(date+" "+pos);
 			}
-			//-------------Attack-------------------------------
+			//-------------Attack-------------------------------------------------------------------------------------------------------------
 
 
 			sensorsSummation += s.getFineDustReading()[pos]*s.getSensorOpinion()[pos].getExpectation();
@@ -123,6 +146,14 @@ public class SensorsManager
 
 		return PMThreshold<=finalReading;
 
+	}
+
+	public static double getAddedValue() {
+		return addedValue;
+	}
+
+	public static void setAddedValue(int addedValue) {
+		SensorsManager.addedValue = addedValue;
 	}
 
 	public static ArrayList<Integer> getParticipation() {
@@ -158,7 +189,7 @@ public class SensorsManager
 			double weightsSummation = 0.0;
 			SubjectiveOpinion firstOpinion = null;
 			ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
-			
+
 			for(Sensor s: sensorsList.values())
 			{
 				if(updatedSensor == s)
@@ -185,13 +216,18 @@ public class SensorsManager
 			double meanOfSquaredValues  = sensorsSquare/weightsSummation;
 			double readingsDeviation = Math.sqrt(meanOfSquaredValues - (Math.pow(cumuliativeResult, 2)));
 			double incTrustMlutiplier = 1.0;
-			double multiplier = 1.5;
+			double ratio = readingsDeviation/cumuliativeResult;
+			double multiplier = 2.0*(1-ratio);
+			if(multiplier<0.5)
+				multiplier=0.5;
+			if(first)
+				multiplier =1.5;
 			double multipliedreadingsDeviation =  multiplier*readingsDeviation;
 			if(firstOpinion==null)
 				return;
 			if(toGetCumulated.isEmpty())
 				return;
-			SubjectiveOpinion cumulativeDecision = firstOpinion.fuse(toGetCumulated);
+			//SubjectiveOpinion cumulativeDecision = firstOpinion.fuse(toGetCumulated);
 
 			double readingUnaccruacy = updatedSensor.getFineDustReading()[pos]*(1-updatedSensor.getSensorOpinion()[pos].getExpectation());		
 			double [] readings = {updatedSensor.getFineDustReading()[pos], 
@@ -261,14 +297,20 @@ public class SensorsManager
 					+evidenceAgainst.get(updatedSensor.getId())+2);
 			double atomicity = reputationList.get(updatedSensor.getId()).getAtomicity();
 			SubjectiveOpinion updatedReputation = new SubjectiveOpinion(belief,disbelief,uncertainity,atomicity);
-			writeTrustToCsvFile(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation, finalReading);
-			writeTrustToCsvFileD(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation, finalReading);
 			updatedReputations.put(updatedSensor.getId(), updatedReputation);
 		}
 		for (int sensor : updatedReputations.keySet())
 		{
 			reputationList.put(sensor, updatedReputations.get(sensor));			
 		}
+	}
+
+	public static double getDecayFactor() {
+		return decayFactor;
+	}
+
+	public static void setDecayFactor(double decayFactor) {
+		SensorsManager.decayFactor = decayFactor;
 	}
 
 	public static void SimulateDay(String date)
@@ -281,7 +323,65 @@ public class SensorsManager
 
 	}
 
-	public static HashMap<Integer, Sensor> getSensorsList() {return sensorsList;}
+	private static void writeFinalDecisionToCsvFile(String date, int pos, double finalReading, SubjectiveOpinion opinion)
+	{
+		FileWriter fileWriter = null;
+
+		try{
+			File file = new File(directory);
+			if (!file.exists()) 
+			{
+				file.createNewFile();
+				fileWriter = new FileWriter(file.getAbsoluteFile(), true);
+				//Write the CSV file header
+				fileWriter.append(FILE_HEADER_2.toString());
+			}
+
+			else{ fileWriter = new FileWriter(file.getAbsoluteFile(), true);}
+
+			//Add a new line separator after the header
+			fileWriter.append(NEW_LINE_SEPARATOR);
+
+			//Write a new student object list to the CSV file
+			fileWriter.append(date.substring(0,4)+date.substring(5,7)+date.substring(8));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(String.valueOf(pos));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+finalReading);
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getBelief());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getDisbelief());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getUncertainty());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getAtomicity());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getExpectation());
+
+		} catch (Exception e) {
+			System.out.println("Error in CsvFileWriter !!!");
+			e.printStackTrace();
+		} finally {
+
+			try {
+				fileWriter.flush();
+				fileWriter.close();
+			} catch (IOException e) {
+				System.out.println("Error while flushing/closing fileWriter !!!");
+				e.printStackTrace();
+			}
+
+		}
+
+	}
+
+	public static HashMap<Integer, Sensor> getSensorsList() {
+		return sensorsList;
+	}
+
+
+	/*public static HashMap<Integer, Sensor> getSensorsList() {return sensorsList;}
 
 	private static void writeTrustToCsvFile(String date, int pos, int id, double reading, SubjectiveOpinion opinion, double finalReading ) {
 
@@ -413,77 +513,7 @@ public class SensorsManager
 			}
 
 		}
-	}
-
-	private static void writeFinalDecisionToCsvFile(String date, int pos, double finalReading, SubjectiveOpinion opinion)
-	{
-		FileWriter fileWriter = null;
-
-		try{
-			File file = new File("/home/nabegh/Bachelor/Results/FinalDecision/FinalDecision1_11.csv");
-			if (!file.exists()) 
-			{
-				file.createNewFile();
-				fileWriter = new FileWriter(file.getAbsoluteFile(), true);
-				//Write the CSV file header
-				fileWriter.append(FILE_HEADER_2.toString());
-			}
-
-			else{ fileWriter = new FileWriter(file.getAbsoluteFile(), true);}
-
-			//Add a new line separator after the header
-			fileWriter.append(NEW_LINE_SEPARATOR);
-
-			//Write a new student object list to the CSV file
-			fileWriter.append(date.substring(0,4)+date.substring(5,7)+date.substring(8));
-			fileWriter.append(COMMA_DELIMITER);
-			fileWriter.append(String.valueOf(pos));
-			fileWriter.append(COMMA_DELIMITER);
-			fileWriter.append(""+finalReading);
-			fileWriter.append(COMMA_DELIMITER);
-			fileWriter.append(""+opinion.getBelief());
-			fileWriter.append(COMMA_DELIMITER);
-			fileWriter.append(""+opinion.getDisbelief());
-			fileWriter.append(COMMA_DELIMITER);
-			fileWriter.append(""+opinion.getUncertainty());
-			fileWriter.append(COMMA_DELIMITER);
-			fileWriter.append(""+opinion.getAtomicity());
-			fileWriter.append(COMMA_DELIMITER);
-			fileWriter.append(""+opinion.getExpectation());
-
-		} catch (Exception e) {
-			System.out.println("Error in CsvFileWriter !!!");
-			e.printStackTrace();
-		} finally {
-
-			try {
-				fileWriter.flush();
-				fileWriter.close();
-			} catch (IOException e) {
-				System.out.println("Error while flushing/closing fileWriter !!!");
-				e.printStackTrace();
-			}
-
-		}
-
-	}
-
-	public static void printX() 
-	{
-		String IDs = "[" ;
-		String X  = "[";
-		String Y = "[";
-		for (Sensor s : sensorsList.values())
-		{
-			IDs  = IDs + "Sensor"+s.getId()+" ";
-			X = X+s.getxCoordinate()+" ";
-			Y = Y+s.getyCoordinate()+" ";
-		}
-		System.out.println(IDs+"]");
-		System.out.println(X+"]");
-		System.out.println(Y+"]");
-
-	}
+	}*/
 
 
 }

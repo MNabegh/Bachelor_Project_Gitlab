@@ -1,0 +1,29 @@
+package sample_programs;
+
+import no.uio.subjective_logic.opinion.SubjectiveOpinion;
+
+public class TestOpinionCumulation 
+{
+	
+	public static void main(String[] args) 
+	{
+		SubjectiveOpinion ax = new SubjectiveOpinion(0.7,0,0.3,0.5);
+		SubjectiveOpinion bx = new SubjectiveOpinion(0.4,0.3,0.3,0.5);
+		SubjectiveOpinion tx = ax.fuse(bx);
+		System.out.println(tx);
+		
+		String x = "DC881BD174CBC4C103121448CC35377F";
+		String out = "{ ";
+		
+		for (int i = 0; i < x.length(); i=i+2) 
+		{
+			if(i<x.length()-3)
+				out+="0x"+x.charAt(i)+x.charAt(i+1)+", ";
+			else
+				out+="0x"+x.charAt(i)+x.charAt(i+1)+" ";
+			
+		}
+		System.out.println(out+"}");
+	}
+
+}

@@ -1,0 +1,492 @@
+package main;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.security.KeyStore.PasswordProtection;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
+
+import no.uio.subjective_logic.opinion.SubjectiveOpinion;
+
+public class SensorsManager
+{
+
+	private static HashMap<Integer,Sensor>sensorsList = new HashMap<Integer,Sensor>();
+	private static HashMap<Integer,SubjectiveOpinion> reputationList = new HashMap<Integer,SubjectiveOpinion>();
+	private static double PMThreshold = 25 ;
+	private static HashMap<Integer,Double> evidenceFor = new HashMap<Integer,Double>();
+	private static HashMap<Integer,Double> evidenceAgainst = new HashMap<Integer,Double>();
+	private static Object lock = new Object();
+	private static double decayFactor = 0.975;
+
+	//Delimiter used in CSV file
+	private static final String COMMA_DELIMITER = ",";
+	private static final String NEW_LINE_SEPARATOR = "\n";
+
+	//CSV file header
+	private static final String FILE_HEADER = "day,hour,SensorID,reading,belief,disbelief,uncertainity,atomicity,expectation,final Reading";
+	private static final String FILE_HEADER_2 = "day,hour,Final Reading, belief,disbelief,uncertainity,atomicity,expectation";
+
+	//Testing
+	private static ArrayList<Integer> Participation = new ArrayList<Integer>();
+	private static int countHours = 0; 
+	private static boolean lastSensor = false;
+	private static boolean attack = false;
+
+	public static void registerSensor(int id, double xCoordinate, double yCoordinate) throws Exception
+	{		
+		if(sensorsList.containsKey(id))
+		{
+			System.err.println("Already Exisisting Sensor");
+			return;
+		}
+		else
+		{
+			SubjectiveOpinion [] array = new SubjectiveOpinion[24];
+			Sensor newSensor = new Sensor(id,xCoordinate,yCoordinate,array);
+			SubjectiveOpinion newOpinion = new SubjectiveOpinion(0,0,1,0.5);
+			if(id==3323)
+				lastSensor=true;
+			synchronized (lock)
+			{
+				sensorsList.put(id, newSensor);
+				reputationList.put(id, newOpinion);	
+				evidenceFor.put(id,0.0);
+				evidenceAgainst.put(id,0.0);
+			}
+		}
+	}
+
+	public static void recieveReading (int id, double fineDustReading, int pos, double x, double y)
+	{
+		sensorsList.get(id).recieveReading(fineDustReading, pos,x,y);
+	}
+
+	public static int getCountHours()
+	{
+		return countHours;
+	}
+
+	public static boolean setAlarm(int pos, String date)
+	{
+		double finalReading = 0.0 ;
+		double sensorsSummation = 0.0;
+		double weightsSummation = 0.0;
+		//SubjectiveOpinion firstOpinion = null;
+		ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
+
+
+
+		for(Sensor s: sensorsList.values())
+		{
+
+			if(s.getSensorOpinion()[pos]== null)
+				continue;
+
+			if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5)
+				continue;
+
+			//-------------Attack------------------------------			
+			if(lastSensor &&  Participation.contains(s.getId()) && countHours++ >50 )
+			{
+				attack=true;
+				Random r = new Random();
+				s.getFineDustReading()[pos]=s.getFineDustReading()[pos]+5;
+				//System.out.println(date+" "+pos);
+			}
+			//-------------Attack-------------------------------
+
+
+			sensorsSummation += s.getFineDustReading()[pos]*s.getSensorOpinion()[pos].getExpectation();
+			weightsSummation += s.getSensorOpinion()[pos].getExpectation();
+			SubjectiveOpinion serversOpinion = s.getSensorOpinion()[pos].discountBy(reputationList.get(s.getId()));
+			toGetCumulated.add(serversOpinion);
+
+		}
+
+		finalReading = sensorsSummation/weightsSummation;
+		if(toGetCumulated.isEmpty())
+		{
+			nullifyAll(pos);
+			return PMThreshold<=finalReading;
+		}
+		SubjectiveOpinion finalDecision = SubjectiveOpinion.fuse(toGetCumulated);
+
+		updateReputations(date,pos,finalReading);
+		nullifyAll(pos);
+
+		boolean alarm =PMThreshold<=finalReading;
+		if(attack)
+			writeFinalDecisionToCsvFile(date, pos, finalReading, finalDecision);
+
+		return PMThreshold<=finalReading;
+
+	}
+
+	public static ArrayList<Integer> getParticipation() {
+		return Participation;
+	}
+
+	private static void nullifyAll(int pos)
+	{
+		for(Sensor s: sensorsList.values())
+		{
+			s.getSensorOpinion()[pos]=null;
+			s.setBatteryLevel(0.0);
+		}
+
+	}
+
+	private static void updateReputations(String date, int pos, double finalReading) 
+	{
+		HashMap<Integer, SubjectiveOpinion> updatedReputations= new HashMap<Integer,SubjectiveOpinion>();
+
+		if(sensorsList.size()==2)
+		{
+			return;
+		}
+
+		for (Sensor updatedSensor : sensorsList.values())
+		{
+			if(updatedSensor.getSensorOpinion()[pos] == null)
+				continue;
+			double cumuliativeResult = 0.0;
+			double sensorsSummation = 0.0;
+			double sensorsSquare = 0.0;
+			double weightsSummation = 0.0;
+			SubjectiveOpinion firstOpinion = null;
+			ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
+			
+			for(Sensor s: sensorsList.values())
+			{
+				if(updatedSensor == s)
+					continue;
+
+				if(s.getSensorOpinion()[pos]== null)
+					continue;
+
+				if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5 )
+					continue;
+
+				sensorsSummation += s.getFineDustReading()[pos]*s.getSensorOpinion()[pos].getExpectation();
+				sensorsSquare += (Math.pow(s.getFineDustReading()[pos],2))*s.getSensorOpinion()[pos].getExpectation();
+				weightsSummation += s.getSensorOpinion()[pos].getExpectation();
+				SubjectiveOpinion serversOpinion = s.getSensorOpinion()[pos].discountBy(reputationList.get(s.getId()));
+				if(firstOpinion == null)
+					firstOpinion = serversOpinion;
+				else
+					toGetCumulated.add(serversOpinion);
+			}
+
+			// Create cumulation result and cumulative deviation without the sensor to be added, *reading sent before updating the reputations		
+			cumuliativeResult = sensorsSummation/weightsSummation;
+			double meanOfSquaredValues  = sensorsSquare/weightsSummation;
+			double readingsDeviation = Math.sqrt(meanOfSquaredValues - (Math.pow(cumuliativeResult, 2)));
+			double incTrustMlutiplier = 1.0;
+			double ratio = readingsDeviation/meanOfSquaredValues;
+			double multiplier = 1.5*(1-ratio);
+			if(ratio>1)
+				multiplier=0.01;
+			double multipliedreadingsDeviation =  multiplier*readingsDeviation;
+			if(firstOpinion==null)
+				return;
+			if(toGetCumulated.isEmpty())
+				return;
+			//SubjectiveOpinion cumulativeDecision = firstOpinion.fuse(toGetCumulated);
+
+			double readingUnaccruacy = updatedSensor.getFineDustReading()[pos]*(1-updatedSensor.getSensorOpinion()[pos].getExpectation());		
+			double [] readings = {updatedSensor.getFineDustReading()[pos], 
+					updatedSensor.getFineDustReading()[pos]-readingUnaccruacy, 
+					updatedSensor.getFineDustReading()[pos]+readingUnaccruacy};
+			double decisionWieght = -1.0;
+			boolean flag = false; //evidence Against
+
+			// most trustworthyReading approach to eliminate the effect of the battery consumption
+			for (double reading: readings)
+			{
+				if(reading<cumuliativeResult)
+				{
+					if(reading>cumuliativeResult-multipliedreadingsDeviation)
+					{
+						if(!flag || (flag && decisionWieght<reading - (cumuliativeResult-multipliedreadingsDeviation)))
+						{
+							decisionWieght = reading - (cumuliativeResult-multipliedreadingsDeviation);
+							flag = true;
+						}
+					}
+
+					else
+
+						if(decisionWieght == -1.0 || (!flag && decisionWieght>(
+								cumuliativeResult-multipliedreadingsDeviation) - reading))
+							decisionWieght = (cumuliativeResult-multipliedreadingsDeviation) - reading;
+				}
+				else 
+				{
+					if(reading<cumuliativeResult+multipliedreadingsDeviation)
+					{
+						if(!flag || (flag && decisionWieght<(cumuliativeResult+multipliedreadingsDeviation) - reading))
+						{
+							decisionWieght = (cumuliativeResult+multipliedreadingsDeviation) - reading;
+							flag = true;
+						}
+					}
+
+					else
+
+						if(decisionWieght == -1.0 || (!flag && decisionWieght>reading - 
+								(cumuliativeResult+multipliedreadingsDeviation)))
+						{
+							decisionWieght = reading - (cumuliativeResult+multipliedreadingsDeviation) ;
+						}
+				}
+			}
+
+			if(flag)
+			{
+				evidenceFor.put(updatedSensor.getId(), evidenceFor.get(updatedSensor.getId())*decayFactor+decisionWieght*incTrustMlutiplier);
+				evidenceAgainst.put(updatedSensor.getId(), evidenceAgainst.get(updatedSensor.getId())*decayFactor+0);
+
+			}
+			else
+			{
+				evidenceAgainst.put(updatedSensor.getId(), evidenceAgainst.get(updatedSensor.getId())*decayFactor+decisionWieght);
+				evidenceFor.put(updatedSensor.getId(), evidenceFor.get(updatedSensor.getId())*decayFactor+0);
+
+			}
+			double belief = evidenceFor.get(updatedSensor.getId())/(evidenceFor.get(updatedSensor.getId())
+					+evidenceAgainst.get(updatedSensor.getId())+2);
+			double disbelief = evidenceAgainst.get(updatedSensor.getId())/(evidenceFor.get(updatedSensor.getId())
+					+evidenceAgainst.get(updatedSensor.getId())+2);
+			double uncertainity = 2/(evidenceFor.get(updatedSensor.getId())
+					+evidenceAgainst.get(updatedSensor.getId())+2);
+			double atomicity = reputationList.get(updatedSensor.getId()).getAtomicity();
+			SubjectiveOpinion updatedReputation = new SubjectiveOpinion(belief,disbelief,uncertainity,atomicity);
+			writeTrustToCsvFile(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation, finalReading);
+			writeTrustToCsvFileD(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation, finalReading);
+			updatedReputations.put(updatedSensor.getId(), updatedReputation);
+		}
+		for (int sensor : updatedReputations.keySet())
+		{
+			reputationList.put(sensor, updatedReputations.get(sensor));			
+		}
+	}
+
+	public static void SimulateDay(String date)
+	{
+		//System.out.println(date);
+		for(int i=0;i<24;i++)
+		{
+			setAlarm(i,date);
+		}
+
+	}
+
+	public static HashMap<Integer, Sensor> getSensorsList() {return sensorsList;}
+
+	private static void writeTrustToCsvFile(String date, int pos, int id, double reading, SubjectiveOpinion opinion, double finalReading ) {
+
+		FileWriter fileWriter = null;
+
+		try {
+			File file = null;
+			if(id!=1098)
+				file= new File("/home/nabegh/Bachelor/Results/Trust/"+id+".csv");
+			else
+				file = new File("/home/nabegh/Bachelor/Results/Trust/"+id+"attack.csv");
+
+			if (!file.exists()) 
+			{
+				file.createNewFile();
+				fileWriter = new FileWriter(file.getAbsoluteFile(), true);
+				//Write the CSV file header
+				fileWriter.append(FILE_HEADER.toString());
+			}
+			else{ fileWriter = new FileWriter(file.getAbsoluteFile(), true);}
+
+
+
+			//Add a new line separator after the header
+			fileWriter.append(NEW_LINE_SEPARATOR);
+
+			//Write a new student object list to the CSV file
+			fileWriter.append(date.substring(0,4)+date.substring(5,7)+date.substring(8));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(String.valueOf(pos));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(String.valueOf(id));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+reading);
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getBelief());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getDisbelief());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getUncertainty());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getAtomicity());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getExpectation());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+finalReading);
+
+
+
+
+
+			//System.out.println("CSV file was created successfully !!!");
+
+		} catch (Exception e) {
+			System.out.println("Error in CsvFileWriter !!!");
+			e.printStackTrace();
+		} finally {
+
+			try {
+				fileWriter.flush();
+				fileWriter.close();
+			} catch (IOException e) {
+				System.out.println("Error while flushing/closing fileWriter !!!");
+				e.printStackTrace();
+			}
+
+		}
+	}
+
+	private static void writeTrustToCsvFileD(String date, int pos, int id, double reading, SubjectiveOpinion opinion, double finalReading ) {
+
+		FileWriter fileWriter = null;
+
+		try {
+			File file = new File("/home/nabegh/Bachelor/Results/Trust/"+date+".csv");
+
+			if (!file.exists()) 
+			{
+				file.createNewFile();
+				fileWriter = new FileWriter(file.getAbsoluteFile(), true);
+				//Write the CSV file header
+				fileWriter.append(FILE_HEADER.toString());
+			}
+			else{ fileWriter = new FileWriter(file.getAbsoluteFile(), true);}
+
+
+
+			//Add a new line separator after the header
+			fileWriter.append(NEW_LINE_SEPARATOR);
+
+			//Write a new student object list to the CSV file
+			fileWriter.append(date.substring(0,4)+date.substring(5,7)+date.substring(8));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(String.valueOf(pos));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(String.valueOf(id));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+reading);
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getBelief());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getDisbelief());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getUncertainty());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getAtomicity());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getExpectation());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+finalReading);
+
+
+
+
+
+			//System.out.println("CSV file was created successfully !!!");
+
+		} catch (Exception e) {
+			System.out.println("Error in CsvFileWriter !!!");
+			e.printStackTrace();
+		} finally {
+
+			try {
+				fileWriter.flush();
+				fileWriter.close();
+			} catch (IOException e) {
+				System.out.println("Error while flushing/closing fileWriter !!!");
+				e.printStackTrace();
+			}
+
+		}
+	}
+
+	private static void writeFinalDecisionToCsvFile(String date, int pos, double finalReading, SubjectiveOpinion opinion)
+	{
+		FileWriter fileWriter = null;
+
+		try{
+			File file = new File("/home/nabegh/Bachelor/Results/FinalDecision/FinalDecision5_11.csv");
+			if (!file.exists()) 
+			{
+				file.createNewFile();
+				fileWriter = new FileWriter(file.getAbsoluteFile(), true);
+				//Write the CSV file header
+				fileWriter.append(FILE_HEADER_2.toString());
+			}
+
+			else{ fileWriter = new FileWriter(file.getAbsoluteFile(), true);}
+
+			//Add a new line separator after the header
+			fileWriter.append(NEW_LINE_SEPARATOR);
+
+			//Write a new student object list to the CSV file
+			fileWriter.append(date.substring(0,4)+date.substring(5,7)+date.substring(8));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(String.valueOf(pos));
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+finalReading);
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getBelief());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getDisbelief());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getUncertainty());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getAtomicity());
+			fileWriter.append(COMMA_DELIMITER);
+			fileWriter.append(""+opinion.getExpectation());
+
+		} catch (Exception e) {
+			System.out.println("Error in CsvFileWriter !!!");
+			e.printStackTrace();
+		} finally {
+
+			try {
+				fileWriter.flush();
+				fileWriter.close();
+			} catch (IOException e) {
+				System.out.println("Error while flushing/closing fileWriter !!!");
+				e.printStackTrace();
+			}
+
+		}
+
+	}
+
+	public static void printX() 
+	{
+		String IDs = "[" ;
+		String X  = "[";
+		String Y = "[";
+		for (Sensor s : sensorsList.values())
+		{
+			IDs  = IDs + "Sensor"+s.getId()+" ";
+			X = X+s.getxCoordinate()+" ";
+			Y = Y+s.getyCoordinate()+" ";
+		}
+		System.out.println(IDs+"]");
+		System.out.println(X+"]");
+		System.out.println(Y+"]");
+
+	}
+
+
+}
