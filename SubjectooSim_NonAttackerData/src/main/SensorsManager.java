@@ -33,6 +33,8 @@ public class SensorsManager
 	private static int countHours = 0; 
 	private static String directory ;
 	private static boolean first ;
+	private static boolean sim;
+	private static String SimDate ;
 
 	public static boolean isFirst() {
 		return first;
@@ -89,9 +91,15 @@ public class SensorsManager
 		double weightsSummation = 0.0;
 		//SubjectiveOpinion firstOpinion = null;
 		ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
-
-
-
+		
+		if(date.equals(SimDate))
+			sim=true;
+		
+		if(!sim)
+			return false;
+		if(countHours++>102)
+			return false;
+		
 		for(Sensor s: sensorsList.values())
 		{
 
@@ -121,12 +129,27 @@ public class SensorsManager
 		nullifyAll(pos);
 
 		boolean alarm =PMThreshold<=finalReading;
-		writeFinalDecisionToCsvFile(date, pos, finalReading, finalDecision);
+		if(countHours>50)
+		{
+			writeFinalDecisionToCsvFile(date, pos, finalReading, finalDecision);
+		}
 
 		return PMThreshold<=finalReading;
 
 	}
 
+
+	public static String getSimDate() {
+		return SimDate;
+	}
+
+	public static void setSimDate(String simDate) {
+		SimDate = simDate;
+	}
+
+	public static void setCountHours(int countHours) {
+		SensorsManager.countHours = countHours;
+	}
 
 	public static ArrayList<Integer> getParticipation() {
 		return Participation;

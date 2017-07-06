@@ -36,6 +36,17 @@ public class SensorsManager
 	private static String directory ;
 	private static boolean first ;
 	private static int addedValue;
+	private static String SimDate ;
+	private static int attackingPeriod ;
+	private static boolean sim;
+
+	public static String getSimDate() {
+		return SimDate;
+	}
+
+	public static void setSimDate(String SimDate) {
+		SensorsManager.SimDate = SimDate;
+	}
 
 	public static boolean isFirst()
 	{
@@ -95,7 +106,14 @@ public class SensorsManager
 		double weightsSummation = 0.0;
 		ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
 
-
+		if(date.equals(SimDate))
+			sim=true;
+		
+		if(!sim)
+			return false;
+		
+		if(attack && attackingPeriod++>50)
+			return false;
 
 		for(Sensor s: sensorsList.values())
 		{
@@ -106,12 +124,13 @@ public class SensorsManager
 			if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5)
 				continue;
 			
-			if(s.getId()==3323)
-				countHours++;
-			//-------------Attack------------------------------------------------------------------------------------------------------------		
-			if(lastSensor &&  Participation.contains(s.getId()) && countHours >50 )
-			{
+			if(countHours>50)
 				attack=true;
+			
+			
+			//-------------Attack------------------------------------------------------------------------------------------------------------		
+			if(lastSensor &&  Participation.contains(s.getId()) && attack )
+			{
 				Random r = new Random();
 				if(addedValue==-1)
 					s.getFineDustReading()[pos]=r.nextInt(51);
@@ -142,7 +161,12 @@ public class SensorsManager
 
 		boolean alarm =PMThreshold<=finalReading;
 		if(attack)
+		{ 
 			writeFinalDecisionToCsvFile(date, pos, finalReading, finalDecision);
+			
+		}
+		
+		countHours++;
 
 		return PMThreshold<=finalReading;
 

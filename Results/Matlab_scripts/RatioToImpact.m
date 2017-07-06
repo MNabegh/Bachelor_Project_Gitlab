@@ -4,8 +4,8 @@ close all
 
 %% Looping
 
-types = [ "Clever-Constant_+15" "Clever-Constant_+50" "Clever-Constant_+200"];
-deca = "0.9";
+types = ["Random-Constant" "Clever-Constant_+5" "Clever-Constant_+10" "Clever-Constant_+15" "Clever-Constant_+50" "Clever-Constant_+200"];
+deca = "0.8";
  
 
 for i=1:length(types)
@@ -28,9 +28,12 @@ attack_5=transpose(attack5_11(:,3));
 attack_6=transpose(attack6_11(:,3));
 
 %% RMSE
-
-y1= [RMSE(normal,normal) RMSE(attack_1,normal) RMSE(attack_2,normal) RMSE(attack_3,normal) RMSE(attack_4,normal) RMSE(attack_5,normal) RMSE(attack_6,normal)];
-
+if i~=1
+    figure
+end
+x= [0 1/11 2/11 3/11 4/11 5/11 6/11 ];
+y1= [0 RMSE(attack_1,normal) RMSE(attack_2,normal) RMSE(attack_3,normal) RMSE(attack_4,normal) RMSE(attack_5,normal) RMSE(attack_6,normal)];
+scatter(x,y1,'x');
 
 
 %% Data Extracting 
@@ -53,22 +56,21 @@ attack_6=transpose(attack6_11(:,3));
 
 %% RMSE
 
-x= [0 1/11 2/11 3/11 4/11 5/11 6/11 ];
-y2= [RMSE(normal,normal) RMSE(attack_1,normal) RMSE(attack_2,normal) RMSE(attack_3,normal) RMSE(attack_4,normal) RMSE(attack_5,normal) RMSE(attack_6,normal)];
-y=[y1;y2]
-y=transpose(y);
+y2= [0 RMSE(attack_1,normal) RMSE(attack_2,normal) RMSE(attack_3,normal) RMSE(attack_4,normal) RMSE(attack_5,normal) RMSE(attack_6,normal)];
 
 %% Plotting
+hold on
 
-figure
-
-b=bar(x,y);
-set(b(2),'facecolor','r');
-
-title(strcat("Decay-0.9",types(i)));
+scatter(x,y2);
+if i~=1
+    title(strcat(strcat("Decay-",deca," "),types(i)));
+else 
+    title(types(i));
+end
 xlabel('attackers to nodes ratio');
 ylabel('root mean square error');
-legend('constant multiplier','variable multiplier');
+legend({'constant multiplier','variable multiplier'},'Location','northwest','FontSize',24);
+
 
 
 end

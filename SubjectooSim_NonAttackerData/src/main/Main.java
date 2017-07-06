@@ -12,15 +12,15 @@ public class Main
 
 	public static void main(String[] args)
 	{
-		double [] Decay = {0.9};
-		for (double d : Decay)
-		{
-			SensorsManager.setDecayFactor(d);
-			SensorsManager.setFirst(false);
+		double  d = Double.parseDouble(args[1]);
+		boolean first = Boolean.parseBoolean(args[0]);
+		SensorsManager.setDecayFactor(d);
+		SensorsManager.setFirst(first);
+		SensorsManager.setSimDate(args[2]);
+		if(!first)
 			run("/Decay_"+d);
-			SensorsManager.setFirst(true);
+		if(first)
 			run("/Decay_"+d+"/"+"/First");
-		}
 
 	}
 
