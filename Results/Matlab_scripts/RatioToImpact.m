@@ -4,8 +4,8 @@ close all
 
 %% Looping
 
-types = ["Random-Constant" "Clever-Constant_+5" "Clever-Constant_+10" "Clever-Constant_+15" "Clever-Constant_+50" "Clever-Constant_+200"];
-deca = "0.8";
+types = [ "Random-Constant" "Clever-Constant_+5" "Clever-Constant_+10" "Clever-Constant_+15" "Clever-Constant_+50" "Clever-Constant_+200"]; % "Random-Constant" "Clever-Constant_+15" "Clever-Constant_+50"
+deca = "0.5";
  
 
 for i=1:length(types)
@@ -33,7 +33,8 @@ if i~=1
 end
 x= [0 1/11 2/11 3/11 4/11 5/11 6/11 ];
 y1= [0 RMSE(attack_1,normal) RMSE(attack_2,normal) RMSE(attack_3,normal) RMSE(attack_4,normal) RMSE(attack_5,normal) RMSE(attack_6,normal)];
-scatter(x,y1,'x');
+sz = 100;
+scatter(x,y1,sz,'x');
 
 
 %% Data Extracting 
@@ -61,7 +62,7 @@ y2= [0 RMSE(attack_1,normal) RMSE(attack_2,normal) RMSE(attack_3,normal) RMSE(at
 %% Plotting
 hold on
 
-scatter(x,y2);
+scatter(x,y2,sz);
 if i~=1
     title(strcat(strcat("Decay-",deca," "),types(i)));
 else 

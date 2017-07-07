@@ -2,22 +2,23 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="multipliedreadingsDeviation" key="selection"/>
-		<item value="false" key="casesensitive"/>
+		<item value="countHours" key="selection"/>
+		<item value="true" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="true" key="wholeword"/>
 		<list key="findhistory">
+			<item value="countHours"/>
+			<item value="SimDate"/>
+			<item value="attackDate"/>
 			<item value="readingsDeviation"/>
 			<item value="readingDeviation"/>
 			<item value="finalDecision"/>
 			<item value="finalReading"/>
 			<item value="system"/>
-			<item value="nullifyAll"/>
-			<item value="nulli"/>
-			<item value="nullf"/>
 		</list>
 		<list key="replacehistory">
+			<item value="SimDate"/>
 			<item value="multipliedreadingsDeviation"/>
 			<item value="fineDustReadings"/>
 			<item value="toGetCumulated"/>

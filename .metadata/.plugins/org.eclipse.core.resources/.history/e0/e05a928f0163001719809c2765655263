@@ -12,13 +12,14 @@ public class Main
 
 	public static void main(String[] args)
 	{
-		double  d = 0.9;
-		int  add = 15;;
-		int j = 3;
-		boolean first = true;
+		double  d = 0.7;
+		int  add = 15;
+		int j = 4;
+		boolean first = false;
 		SensorsManager.setDecayFactor(d);
 		SensorsManager.setAddedValue(add);
 		SensorsManager.setFirst(first);
+		SensorsManager.setSimDate("2017-06-11");
 		String type = "/Decay_"+d;
 		if(first)
 			type+="/First";
@@ -26,6 +27,7 @@ public class Main
 			type+="/Random-Constant";
 		else
 			type+="/Clever-Constant_+"+add;
+		//System.out.println(type);
 		run(type, j);				
 
 
@@ -39,11 +41,9 @@ public class Main
 			directory.mkdirs();	
 		}
 		String dir = directory+"/FinalDecision"+j+"_11.csv";
+		System.out.println(dir);
 		SensorsManager.setDirectory(dir);
-		File file = new File(dir);
-		if(file.exists())
-			file.delete();
-
+		
 		SensorsManager.getParticipation().add(1098);
 		if(j>1)
 			SensorsManager.getParticipation().add(3323);

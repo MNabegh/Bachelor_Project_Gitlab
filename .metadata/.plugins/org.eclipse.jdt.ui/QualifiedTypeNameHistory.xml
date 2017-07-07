@@ -14,7 +14,10 @@
 <fullyQualifiedTypeName name="no.uio.subjective_logic.opinion.SubjectiveOpinion"/>
 <fullyQualifiedTypeName name="main.AttackScenario"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
-<fullyQualifiedTypeName name="main.AttackerType"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="java.lang.System"/>
+<fullyQualifiedTypeName name="java.lang.Boolean"/>
+<fullyQualifiedTypeName name="sample_programs.TestOpinionCumulation"/>
+<fullyQualifiedTypeName name="main.AttackerType"/>
 <fullyQualifiedTypeName name="main.SensorsManager"/>
 </qualifiedTypeNameHistroy>
