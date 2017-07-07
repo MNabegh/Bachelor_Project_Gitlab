@@ -29,16 +29,16 @@ public class SensorsManager
 	private static final String FILE_HEADER_2 = "day,hour,Final Reading, belief,disbelief,uncertainity,atomicity,expectation";
 
 	//Testing
-	private static ArrayList<Integer> Participation = new ArrayList<Integer>(); // List of Attacker nodes
-	private static int countHours = 0; // counter for the simulation time
-	private static boolean lastSensor = false; // flag that the last sensor has joined the network
-	private static boolean attack = false; // flag that the enough time passed for the system to stabilize and attacking nodes can start their attack
-	private static String directory ; // dirtectory in which the results are saved 
-	private static boolean first ; // using the first approach or the second explained later in the code
-	private static int addedValue; // the value by which attackers are trying to move their 
-	private static String SimDate ; // date when the simulation starts helps randomize the start date
-	private static int attackingPeriod ; // the period for which the attack will last to stop the simulation, in the simulation with no attacks we use the total simulation time instead
-	private static boolean sim; // falg signals the start of the simulation
+	private static ArrayList<Integer> Participation = new ArrayList<Integer>();
+	private static int countHours = 0; 
+	private static boolean lastSensor = false;
+	private static boolean attack = false;
+	private static String directory ;
+	private static boolean first ;
+	private static int addedValue;
+	private static String SimDate ;
+	private static int attackingPeriod ;
+	private static boolean sim;
 
 	public static String getSimDate() {
 		return SimDate;
@@ -69,21 +69,21 @@ public class SensorsManager
 	{		
 		if(sensorsList.containsKey(id))
 		{
-			System.err.println("Already Exisisting Sensor"); // logically should not be reached easier than implementing an exception
+			System.err.println("Already Exisisting Sensor");
 			return;
 		}
 		else
 		{
-			SubjectiveOpinion [] array = new SubjectiveOpinion[24]; // list of sensor's opinion about readings from every hour in the day
-			Sensor newSensor = new Sensor(id,xCoordinate,yCoordinate,array); // create a new sensor object for the new sensor
-			SubjectiveOpinion newOpinion = new SubjectiveOpinion(0,0,1,0.5); // server's initial opinion about the sensor is a vacuous one
-			if(id==3323) // signal the joining of the last sensor
+			SubjectiveOpinion [] array = new SubjectiveOpinion[24];
+			Sensor newSensor = new Sensor(id,xCoordinate,yCoordinate,array);
+			SubjectiveOpinion newOpinion = new SubjectiveOpinion(0,0,1,0.5);
+			if(id==3323)
 				lastSensor=true;
-			synchronized (lock) // prevent any other threads from copying the lists and writing to it as other threads are attempting the same
+			synchronized (lock)
 			{
-				sensorsList.put(id, newSensor); // add the sensor to the sensors' list
-				reputationList.put(id, newOpinion);	 // add the vacuous as the server's current opinion on the new sensor
-				evidenceFor.put(id,0.0); // no evidence collected yet
+				sensorsList.put(id, newSensor);
+				reputationList.put(id, newOpinion);	
+				evidenceFor.put(id,0.0);
 				evidenceAgainst.put(id,0.0);
 			}
 		}
@@ -91,7 +91,7 @@ public class SensorsManager
 
 	public static void recieveReading (int id, double fineDustReading, int pos, double x, double y)
 	{
-		sensorsList.get(id).recieveReading(fineDustReading, pos,x,y); // identifies the sensor by id and forward the reading to the sensor object to save the reading
+		sensorsList.get(id).recieveReading(fineDustReading, pos,x,y);
 	}
 
 	public static int getCountHours()
@@ -99,7 +99,7 @@ public class SensorsManager
 		return countHours;
 	}
 
-	public static boolean setAlarm(int pos, String date) // method to produce final estimation of the level of fine dust in the area
+	public static boolean setAlarm(int pos, String date)
 	{
 		double finalReading = 0.0 ;
 		double sensorsSummation = 0.0;
