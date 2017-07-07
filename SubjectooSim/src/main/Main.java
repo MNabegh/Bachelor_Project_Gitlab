@@ -12,14 +12,14 @@ public class Main
 
 	public static void main(String[] args)
 	{
-		double  d = 0.7;
-		int  add = 50;
-		int j = 6;
-		boolean first = false;
+		double  d = 0.8;//Double.parseDouble(args[1]);
+		int  add = 10;//Integer.parseInt(args[2]);
+		int j = 5;//Integer.parseInt(args[4]);
+		boolean first = false;//Boolean.parseBoolean(args[0]);
 		SensorsManager.setDecayFactor(d);
 		SensorsManager.setAddedValue(add);
 		SensorsManager.setFirst(first);
-		SensorsManager.setSimDate("2017-06-11");
+		SensorsManager.setSimDate("2017-06-28");//args[3]);
 		String type = "/Decay_"+d;
 		if(first)
 			type+="/First";

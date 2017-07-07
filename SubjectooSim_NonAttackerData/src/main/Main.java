@@ -12,11 +12,11 @@ public class Main
 
 	public static void main(String[] args)
 	{
-		double  d = Double.parseDouble(args[1]);
-		boolean first = Boolean.parseBoolean(args[0]);
+		double  d = 0.8;//Double.parseDouble(args[1]);
+		boolean first = false;//Boolean.parseBoolean(args[0]);
 		SensorsManager.setDecayFactor(d);
 		SensorsManager.setFirst(first);
-		SensorsManager.setSimDate(args[2]);
+		SensorsManager.setSimDate("2017-06-23");
 		if(!first)
 			run("/Decay_"+d);
 		if(first)

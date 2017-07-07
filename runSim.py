@@ -5,7 +5,7 @@ from multiprocessing import Process
 
 def runCommand1(f,d,a,date,n):
 
-				command ="sudo java -jar /home/nabegh/Bachelor/SubjectooSim/Run.jar "+str(f)+' '+str(d)+' '+str(a)+" "+str(date)+" "+str(n)
+				command ="java -jar /home/nabegh/Bachelor/SubjectooSim/Run.jar "+str(f)+' '+str(d)+' '+str(a)+" "+str(date)+" "+str(n)
 				os.system(command)
 
 def main():		
@@ -28,8 +28,8 @@ def main():
 		for f in first:
 			for n in number:
 				for a in add:
-					p=Process(target=runCommand1,args=(f,d,a,date,n))
-					p.start()
+					command ="sudo java -jar /home/nabegh/Bachelor/SubjectooSim/Run.jar "+str(f)+' '+str(d)+' '+str(a)+" "+str(date)+" "+str(n)
+					os.system(command)
 			command2 = "sudo java -jar /home/nabegh/Bachelor/SubjectooSim/Run2.jar "+str(f)+' '+str(d)+' '+str(date)
 			os.system(command2)
 

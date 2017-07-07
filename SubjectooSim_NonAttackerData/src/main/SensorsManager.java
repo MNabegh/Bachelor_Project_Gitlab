@@ -97,7 +97,7 @@ public class SensorsManager
 		
 		if(!sim)
 			return false;
-		if(countHours++>102)
+		if(countHours++>110)
 			return false;
 		
 		for(Sensor s: sensorsList.values())
@@ -109,10 +109,10 @@ public class SensorsManager
 			if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5)
 				continue;
 
-
-			sensorsSummation += s.getFineDustReading()[pos]*s.getSensorOpinion()[pos].getExpectation();
-			weightsSummation += s.getSensorOpinion()[pos].getExpectation();
 			SubjectiveOpinion serversOpinion = s.getSensorOpinion()[pos].discountBy(reputationList.get(s.getId()));
+			sensorsSummation += s.getFineDustReading()[pos]*serversOpinion.getExpectation();
+			weightsSummation += serversOpinion.getExpectation();
+			
 			toGetCumulated.add(serversOpinion);
 
 		}
@@ -195,11 +195,12 @@ public class SensorsManager
 
 				if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5 )
 					continue;
-
-				sensorsSummation += s.getFineDustReading()[pos]*s.getSensorOpinion()[pos].getExpectation();
-				sensorsSquare += (Math.pow(s.getFineDustReading()[pos],2))*s.getSensorOpinion()[pos].getExpectation();
-				weightsSummation += s.getSensorOpinion()[pos].getExpectation();
+				
 				SubjectiveOpinion serversOpinion = s.getSensorOpinion()[pos].discountBy(reputationList.get(s.getId()));
+				sensorsSummation += s.getFineDustReading()[pos]*serversOpinion.getExpectation();
+				sensorsSquare += (Math.pow(s.getFineDustReading()[pos],2))*serversOpinion.getExpectation();
+				weightsSummation += serversOpinion.getExpectation();
+				
 				if(firstOpinion == null)
 					firstOpinion = serversOpinion;
 				else
