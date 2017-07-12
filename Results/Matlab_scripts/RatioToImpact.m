@@ -5,7 +5,7 @@ close all
 %% Looping
 
 types = ["Random-Constant" "Clever-Constant_+5" "Clever-Constant_+10" "Clever-Constant_+15" "Clever-Constant_+50" "Clever-Constant_+200"]; % "Random-Constant" "Clever-Constant_+15" "Clever-Constant_+50"
-deca = "0.5";
+deca = "0.9";
  
 
 for i=1:length(types)

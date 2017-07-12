@@ -10,8 +10,13 @@ def runCommand1(f,d,a,date,n):
 
 def main():		
 
-	month = random.randint(6,7);
+	month = random.randint(6,8);
 	day=random.randint(8,30);
+
+	if month == 7:
+		day(1,4)
+	else:
+		day(8,32)
 
 	if day > 9:
 		date = "2017-0"+str(month)+"-"+str(day)

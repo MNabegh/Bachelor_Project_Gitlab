@@ -41,7 +41,7 @@ public class Main
 			directory.mkdirs();	
 		}
 		String dir = directory+"/FinalDecision"+j+"_11.csv";
-		System.out.println(dir);
+		//System.out.println(dir);
 		SensorsManager.setDirectory(dir);
 		
 		SensorsManager.getParticipation().add(1098);

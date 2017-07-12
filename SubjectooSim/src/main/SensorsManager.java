@@ -33,37 +33,16 @@ public class SensorsManager
 	private static int countHours = 0; // counter for the simulation time
 	private static boolean lastSensor = false; // flag that the last sensor has joined the network
 	private static boolean attack = false; // flag that the enough time passed for the system to stabilize and attacking nodes can start their attack
-	private static String directory ; // dirtectory in which the results are saved 
+	private static String directory ; // directory in which the results are saved 
 	private static boolean first ; // using the first approach or the second explained later in the code
 	private static int addedValue; // the value by which attackers are trying to move their 
 	private static String SimDate ; // date when the simulation starts helps randomize the start date
 	private static int attackingPeriod ; // the period for which the attack will last to stop the simulation, in the simulation with no attacks we use the total simulation time instead
-	private static boolean sim; // falg signals the start of the simulation
-
-	public static String getSimDate() {
-		return SimDate;
-	}
-
-	public static void setSimDate(String SimDate) {
-		SensorsManager.SimDate = SimDate;
-	}
-
-	public static boolean isFirst()
-	{
-		return first;
-	}
-
-	public static void setFirst(boolean first) {
-		SensorsManager.first = first;
-	}
-
-	public static String getDirectory() {
-		return directory;
-	}
-
-	public static void setDirectory(String directory) {
-		SensorsManager.directory = directory;
-	}
+	private static boolean sim; // flag signals the start of the simulation
+	private static int periodLength;
+	private static int frequencyOfAttack;
+	private static int timeToStartAttack;
+	private static int timeToEndAttack;
 
 	public static void registerSensor(int id, double xCoordinate, double yCoordinate) throws Exception
 	{		
@@ -101,102 +80,90 @@ public class SensorsManager
 
 	public static boolean setAlarm(int pos, String date) // method to produce final estimation of the level of fine dust in the area
 	{
-		double finalReading = 0.0 ;
-		double sensorsSummation = 0.0;
-		double weightsSummation = 0.0;
-		ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
+		double finalReading = 0.0 ; // variable to save the final estimation
+		double sensorsSummation = 0.0; // variable for summing all the valid sensor readings
+		double weightsSummation = 0.0; // variable for summing all of the weights of each sensor's reading
+		ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>(); // list of all of the opinions that will be cumulated
 
-		if(date.equals(SimDate))
+		if(date.equals(SimDate)) // change the flag to start the simulation to true when the start date comes
 			sim=true;
 		
-		if(!sim)
+		if(!sim) // stops the program from simulating the day in case the date to has not come yet
 			return false;
 		
-		if(attack && attackingPeriod++>50)
+		if(attack && attackingPeriod++>50) // stops the simulation if the simulation period is over
 			return false;
+		
+		//----------------------------------------------- Loop on all sensors to prepare to produce the final reading and calculate the values of some of the above variables --------------------------------------------------
 
-		for(Sensor s: sensorsList.values())
+		for(Sensor s: sensorsList.values()) // l
 		{
 
-			if(s.getSensorOpinion()[pos]== null)
+			if(s.getSensorOpinion()[pos]== null) // means this sensor has not received readings for this hour
 				continue;
 
-			if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5)
+			if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5) // blocking sensors with very low belief in them and enough evidence to support that
 				continue;
 			
-			if(countHours>50)
+			if(countHours>50) // change the flag to start the attack to true
 				attack=true;
 			
 			
 			//-------------Attack------------------------------------------------------------------------------------------------------------		
-			if(lastSensor &&  Participation.contains(s.getId()) && attack )
+			if(Participation.contains(s.getId()) && attack ) // 
 			{
-				Random r = new Random();
 				if(addedValue==-1)
-					s.getFineDustReading()[pos]=r.nextInt(51);
+				{
+					Random r = new Random(); // create random object
+					s.getFineDustReading()[pos]=r.nextInt(51); // inject random reading instead of using actual readings
+				}
 				else
-					s.getFineDustReading()[pos]=s.getFineDustReading()[pos]+addedValue;
-				//System.out.println(date+" "+pos);
+					s.getFineDustReading()[pos]=s.getFineDustReading()[pos]+addedValue; // try to move the current reading by a certain value
 			}
 			//-------------Attack-------------------------------------------------------------------------------------------------------------
 
-			SubjectiveOpinion serversOpinion = s.getSensorOpinion()[pos].discountBy(reputationList.get(s.getId()));
-			sensorsSummation += s.getFineDustReading()[pos]*serversOpinion.getExpectation();
-			weightsSummation += serversOpinion.getExpectation();
-			toGetCumulated.add(serversOpinion);
+			SubjectiveOpinion serversOpinion = s.getSensorOpinion()[pos].discountBy(reputationList.get(s.getId())); // servers final opinion about the node's reading 
+			sensorsSummation += s.getFineDustReading()[pos]*serversOpinion.getExpectation(); // add the sensor's reading to the weighted summation of all available sensors' readings
+			weightsSummation += serversOpinion.getExpectation(); // add the weight of this sensor to the weights summation
+			toGetCumulated.add(serversOpinion); // add the server's opinion about the sensor to the list of opinions about the sensors, that were taken into consideration to be cumulated
 
 		}
+		
+		//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-		finalReading = sensorsSummation/weightsSummation;
-		if(toGetCumulated.isEmpty())
+		finalReading = sensorsSummation/weightsSummation; // calculate the final reading which is the weighted mean
+		
+		//------------------------------------------------------------------------------  
+		if(toGetCumulated.isEmpty()) // if no available sensors to read 
 		{
-			nullifyAll(pos);
-			return PMThreshold<=finalReading;
+			nullifyAll(pos); // nullify all the current readings 
+			return PMThreshold<=finalReading; 
 		}
-		SubjectiveOpinion finalDecision = SubjectiveOpinion.fuse(toGetCumulated);
+		//------------------------------------------------------------------------------
+		SubjectiveOpinion finalDecision = SubjectiveOpinion.fuse(toGetCumulated); // cumulate all the available opinions 
 
-		updateReputations(date,pos,finalReading);
-		nullifyAll(pos);
+		updateReputations(date,pos,finalReading); // update the reputations current nodes
+		nullifyAll(pos); // reset all values
 
-		boolean alarm =PMThreshold<=finalReading;
-		if(attack)
+		//boolean alarm = PMThreshold<=finalReading; 
+		
+		if(attack) // the attack started start recording the results
 		{ 
-			writeFinalDecisionToCsvFile(date, pos, finalReading, finalDecision);
+			writeFinalDecisionToCsvFile(date, pos, finalReading, finalDecision); // record the results of the current time step
 			System.out.println(attack+" "+attackingPeriod);
 			printReputations();
 			
 		}
 		
-		countHours++;
+		countHours++; // increment the current simulation length as it lasted for one more hour
 
 		return PMThreshold<=finalReading;
 
 	}
 
-	private static void printReputations() 
-	{
-		for (SubjectiveOpinion so : reputationList.values()) 
-		{
-			System.out.print(so.getBelief()+" ");
-		}
-		
-	}
-
-	public static double getAddedValue() {
-		return addedValue;
-	}
-
-	public static void setAddedValue(int addedValue) {
-		SensorsManager.addedValue = addedValue;
-	}
-
-	public static ArrayList<Integer> getParticipation() {
-		return Participation;
-	}
-
 	private static void nullifyAll(int pos)
 	{
-		for(Sensor s: sensorsList.values())
+		for(Sensor s: sensorsList.values()) 
 		{
 			s.getSensorOpinion()[pos]=null;
 			s.setBatteryLevel(0.0);
@@ -342,6 +309,18 @@ public class SensorsManager
 			reputationList.put(sensor, updatedReputations.get(sensor));			
 		}
 	}
+	
+	public static void SimulateDay(String date)
+	{
+		//System.out.println(date);
+		for(int i=0;i<24;i++)
+		{
+			setAlarm(i,date); // loop to run the simulation for every hour of the day
+		}
+
+	}
+	
+	// --------------------------------------------------------- Under Development ------------------------------------------------------------------
 
 	private static void standrizeReadings(int pos) 
 	{
@@ -360,7 +339,52 @@ public class SensorsManager
 		}
 		
 	}
+	
+	// ---------------------------------------------------------------------------------------------------------------------------------------------
+	
+	// --------------------------------------------------------- Getters, Setters and printing methods -----------------------------------------------------------------------
+	
+	public static String getSimDate() {
+		return SimDate;
+	}
 
+	public static void setSimDate(String SimDate) {
+		SensorsManager.SimDate = SimDate;
+	}
+
+	public static boolean isFirst()
+	{
+		return first;
+	}
+
+	public static int getPeriodLength() {
+		return periodLength;
+	}
+
+	public static void setPeriodLength(int periodLength) {
+		SensorsManager.periodLength = periodLength;
+	}
+
+	public static int getFrequencyOfAttack() {
+		return frequencyOfAttack;
+	}
+
+	public static void setFrequencyOfAttack(int frequencyOfAttack) {
+		SensorsManager.frequencyOfAttack = frequencyOfAttack;
+	}
+
+	public static void setFirst(boolean first) {
+		SensorsManager.first = first;
+	}
+
+	public static String getDirectory() {
+		return directory;
+	}
+
+	public static void setDirectory(String directory) {
+		SensorsManager.directory = directory;
+	}
+	
 	public static double getDecayFactor() {
 		return decayFactor;
 	}
@@ -368,17 +392,32 @@ public class SensorsManager
 	public static void setDecayFactor(double decayFactor) {
 		SensorsManager.decayFactor = decayFactor;
 	}
-
-	public static void SimulateDay(String date)
+	
+	private static void printReputations() 
 	{
-		//System.out.println(date);
-		for(int i=0;i<24;i++)
+		for (SubjectiveOpinion so : reputationList.values()) 
 		{
-			setAlarm(i,date);
+			System.out.print(so.getBelief()+" ");
 		}
-
+		
 	}
 
+	public static double getAddedValue() {
+		return addedValue;
+	}
+
+	public static void setAddedValue(int addedValue) {
+		SensorsManager.addedValue = addedValue;
+	}
+
+	public static ArrayList<Integer> getParticipation() {
+		return Participation;
+	}
+	
+	public static HashMap<Integer, Sensor> getSensorsList() {return sensorsList;}
+ // ---------------------------------------------------------------------------------------------------------------------------------------------
+	
+ //------------------------------------------------------------ Writing to CSV Files -------------------------------------------------------------------
 	private static void writeFinalDecisionToCsvFile(String date, int pos, double finalReading, SubjectiveOpinion opinion)
 	{
 		FileWriter fileWriter = null;
@@ -433,7 +472,7 @@ public class SensorsManager
 	}
 
 
-	public static HashMap<Integer, Sensor> getSensorsList() {return sensorsList;}
+	
 
 	private static void writeTrustToCsvFile(String date, int pos, int id, double reading, SubjectiveOpinion opinion, double finalReading ) {
 
