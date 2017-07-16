@@ -17,7 +17,7 @@ Sensor1286 = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/1286.csv"),2061
 Sensor1462 = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/1462.csv"),1733,4,[1733 4 1733 4]);
 Sensor2630 = csvread(strcat("/home/nabegh/Bachelor/Results/Trust/2630.csv"),801,4,[801 4 801 4]);
 
-Z = [Sensor481 Sensor1973 Sensor1286 Sensor1462 Sensor2630 Sensor1002 Sensor1098 Sensor1178 Sensor2394 Sensor255]
+Z = [Sensor481 Sensor1973 Sensor1286 Sensor1462 Sensor2630 Sensor1002 Sensor1098 Sensor1178 Sensor2394 Sensor255];
 X = [48.442 48.392 48.385 48.41 48.413 48.399 48.397 48.408 48.412 48.397 ]; 
 Y = [9.997 9.96 9.947 9.934 9.952 9.993 10.01 10.004 10.006 9.99 ];
 

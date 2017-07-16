@@ -105,8 +105,12 @@ public class SensorsManager
 			if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5) // blocking sensors with very low belief in them and enough evidence to support that
 				continue;
 			
-			if(countHours>50) // change the flag to start the attack to true
+			if(countHours>50 && timeToEndAttack<=0 && timeToStartAttack-- <= 0) // change the flag to start the attack to true
+			{
 				attack=true;
+				timeToEndAttack = periodLength; // start attack period
+				timeToStartAttack = 0; // attack is ongoing
+			}
 			
 			
 			//-------------Attack------------------------------------------------------------------------------------------------------------		
@@ -120,7 +124,7 @@ public class SensorsManager
 				else
 					s.getFineDustReading()[pos]=s.getFineDustReading()[pos]+addedValue; // try to move the current reading by a certain value
 			}
-			//-------------Attack-------------------------------------------------------------------------------------------------------------
+			//---------------------------------------------------------------------------------------------------------------------------------
 
 			SubjectiveOpinion serversOpinion = s.getSensorOpinion()[pos].discountBy(reputationList.get(s.getId())); // servers final opinion about the node's reading 
 			sensorsSummation += s.getFineDustReading()[pos]*serversOpinion.getExpectation(); // add the sensor's reading to the weighted summation of all available sensors' readings
@@ -145,13 +149,15 @@ public class SensorsManager
 		updateReputations(date,pos,finalReading); // update the reputations current nodes
 		nullifyAll(pos); // reset all values
 
-		//boolean alarm = PMThreshold<=finalReading; 
+		if(--timeToEndAttack == 0)
+		{
+			attack=false;
+			timeToStartAttack = frequencyOfAttack-periodLength;
+		}
 		
 		if(attack) // the attack started start recording the results
 		{ 
 			writeFinalDecisionToCsvFile(date, pos, finalReading, finalDecision); // record the results of the current time step
-			System.out.println(attack+" "+attackingPeriod);
-			printReputations();
 			
 		}
 		
