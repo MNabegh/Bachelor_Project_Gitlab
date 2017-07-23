@@ -12,16 +12,16 @@ public class Main
 
 	public static void main(String[] args)
 	{
-		double  d = 0.8;//Double.parseDouble(args[1]);
-		boolean first = false;//Boolean.parseBoolean(args[0]);
+		double  d = 0.9;//Double.parseDouble(args[1]);
+		boolean first = false; //Boolean.parseBoolean(args[0]);
 		SensorsManager.setDecayFactor(d);
 		SensorsManager.setFirst(first);
-		SensorsManager.setSimDate("2017-06-23");
+		SensorsManager.setEndSim(24*10+5+1+50);
+		SensorsManager.setSimDate("2017-06-22");
 		if(!first)
 			run("/Decay_"+d);
 		if(first)
 			run("/Decay_"+d+"/"+"/First");
-
 	}
 
 	public static void run(String first)
@@ -74,10 +74,7 @@ public class Main
 			{
 				e.printStackTrace();
 			}
-
 		}
-
-
 	}
 
 

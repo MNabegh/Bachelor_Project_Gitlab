@@ -9,7 +9,6 @@
 <fullyQualifiedTypeName name="java.util.logging.FileHandler"/>
 <fullyQualifiedTypeName name="main.FileHandler"/>
 <fullyQualifiedTypeName name="java.lang.Double"/>
-<fullyQualifiedTypeName name="java.lang.Integer"/>
 <fullyQualifiedTypeName name="java.lang.NullPointerException"/>
 <fullyQualifiedTypeName name="no.uio.subjective_logic.opinion.SubjectiveOpinion"/>
 <fullyQualifiedTypeName name="main.AttackScenario"/>
@@ -19,5 +18,7 @@
 <fullyQualifiedTypeName name="java.lang.Boolean"/>
 <fullyQualifiedTypeName name="sample_programs.TestOpinionCumulation"/>
 <fullyQualifiedTypeName name="main.AttackerType"/>
+<fullyQualifiedTypeName name="java.lang.InheritableThreadLocal"/>
+<fullyQualifiedTypeName name="java.lang.Integer"/>
 <fullyQualifiedTypeName name="main.SensorsManager"/>
 </qualifiedTypeNameHistroy>

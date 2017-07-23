@@ -12,36 +12,41 @@ public class Main
 
 	public static void main(String[] args)
 	{
-		double  d = 0.8;//Double.parseDouble(args[1]);
-		int  add = 10;//Integer.parseInt(args[2]);
-		int j = 5;//Integer.parseInt(args[4]);
-		boolean first = false;//Boolean.parseBoolean(args[0]);
+		double  d = Double.parseDouble(args[1]);
+		int  add = Integer.parseInt(args[2]);
+		int j = Integer.parseInt(args[4]);
+		boolean first = Boolean.parseBoolean(args[0]);
+		int foa = Integer.parseInt(args[5]);
+		int poa = Integer.parseInt(args[6]);
 		SensorsManager.setDecayFactor(d);
 		SensorsManager.setAddedValue(add);
 		SensorsManager.setFirst(first);
-		SensorsManager.setSimDate("2017-06-28");//args[3]);
+		SensorsManager.setFrequencyOfAttack(foa);
+		SensorsManager.setPeriodLength(poa);
+		SensorsManager.setNextAttack(51);
+		SensorsManager.setSimDate(args[3]);//args[3]);
 		String type = "/Decay_"+d;
 		if(first)
 			type+="/First";
 		if(add==-1)
 			type+="/Random-Constant";
 		else
-			type+="/Clever-Constant_+"+add;
+			type+="/Clever-Constant_+"+add+"/Frequency"+foa;
 		//System.out.println(type);
-		run(type, j);				
+		run(type, j,poa);				
 
 
 	}
 
-	public static void run(String first,int j)
+	public static void run(String first,int j,int poa)
 	{
-		File directory = new File("/home/nabegh/Bachelor/Results/FinalDecision/"+first);
+		File directory = new File("/home/nabegh/Bachelor/Results/FinalDecision/"+first+"/AttackersRatio"+j+"_11");
 		if(!directory.exists())
 		{
 			directory.mkdirs();	
 		}
-		String dir = directory+"/FinalDecision"+j+"_11.csv";
-		//System.out.println(dir);
+		String dir = directory+"/Period"+poa+".csv";
+		System.out.println(dir);
 		SensorsManager.setDirectory(dir);
 		
 		SensorsManager.getParticipation().add(1098);

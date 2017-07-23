@@ -14,9 +14,9 @@ def main():
 	day=random.randint(8,30);
 
 	if month == 7:
-		day(1,4)
+		day=random.randint(1,8);
 	else:
-		day(8,32)
+		day=random.randint(8,31);
 
 	if day > 9:
 		date = "2017-0"+str(month)+"-"+str(day)
@@ -28,13 +28,17 @@ def main():
 	add = ["-1","5","10","15","50","200"]
 	number = ["1","2","3","4","5","6"]
 	first = ["true" , "false"]
+	period = ["1", "2","3", "4","5"]
+	frequency = ["6"," 12", "18","24"]
 
 	for d in decay:
 		for f in first:
 			for n in number:
 				for a in add:
-					command ="sudo java -jar /home/nabegh/Bachelor/SubjectooSim/Run.jar "+str(f)+' '+str(d)+' '+str(a)+" "+str(date)+" "+str(n)
-					os.system(command)
+					for p in period:
+						for v in frequency:
+							command ="sudo java -jar /home/nabegh/Bachelor/SubjectooSim/Run.jar "+str(f)+' '+str(d)+' '+str(a)+" "+str(date)+" "+str(n)+" "+str(v)+" "+str(p)
+							os.system(command)
 			command2 = "sudo java -jar /home/nabegh/Bachelor/SubjectooSim/Run2.jar "+str(f)+' '+str(d)+' '+str(date)
 			os.system(command2)
 

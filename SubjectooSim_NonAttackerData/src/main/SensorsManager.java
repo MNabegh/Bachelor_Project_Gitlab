@@ -35,6 +35,15 @@ public class SensorsManager
 	private static boolean first ;
 	private static boolean sim;
 	private static String SimDate ;
+	private static int endSim;
+
+	public static int getEndSim() {
+		return endSim;
+	}
+
+	public static void setEndSim(int endSim) {
+		SensorsManager.endSim = endSim;
+	}
 
 	public static boolean isFirst() {
 		return first;
@@ -91,15 +100,15 @@ public class SensorsManager
 		double weightsSummation = 0.0;
 		//SubjectiveOpinion firstOpinion = null;
 		ArrayList<SubjectiveOpinion> toGetCumulated = new ArrayList<SubjectiveOpinion>();
-		
+
 		if(date.equals(SimDate))
 			sim=true;
-		
+
 		if(!sim)
 			return false;
-		if(countHours++>110)
+		if(countHours++>endSim)
 			return false;
-		
+
 		for(Sensor s: sensorsList.values())
 		{
 
@@ -112,7 +121,7 @@ public class SensorsManager
 			SubjectiveOpinion serversOpinion = s.getSensorOpinion()[pos].discountBy(reputationList.get(s.getId()));
 			sensorsSummation += s.getFineDustReading()[pos]*serversOpinion.getExpectation();
 			weightsSummation += serversOpinion.getExpectation();
-			
+
 			toGetCumulated.add(serversOpinion);
 
 		}
@@ -131,7 +140,7 @@ public class SensorsManager
 		boolean alarm =PMThreshold<=finalReading;
 		if(countHours>50)
 		{
-			writeFinalDecisionToCsvFile(date, pos, finalReading, finalDecision);
+			//writeFinalDecisionToCsvFile(date, pos, finalReading, finalDecision);
 		}
 
 		return PMThreshold<=finalReading;
@@ -195,12 +204,12 @@ public class SensorsManager
 
 				if(reputationList.get(s.getId()).getBelief()<0.1 && reputationList.get(s.getId()).getUncertainty()<0.5 )
 					continue;
-				
+
 				SubjectiveOpinion serversOpinion = s.getSensorOpinion()[pos].discountBy(reputationList.get(s.getId()));
 				sensorsSummation += s.getFineDustReading()[pos]*serversOpinion.getExpectation();
 				sensorsSquare += (Math.pow(s.getFineDustReading()[pos],2))*serversOpinion.getExpectation();
 				weightsSummation += serversOpinion.getExpectation();
-				
+
 				if(firstOpinion == null)
 					firstOpinion = serversOpinion;
 				else
@@ -293,8 +302,11 @@ public class SensorsManager
 					+evidenceAgainst.get(updatedSensor.getId())+2);
 			double atomicity = reputationList.get(updatedSensor.getId()).getAtomicity();
 			SubjectiveOpinion updatedReputation = new SubjectiveOpinion(belief,disbelief,uncertainity,atomicity);
-			writeTrustToCsvFile(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation, finalReading);
-			writeTrustToCsvFileD(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation, finalReading);
+			if(countHours>50 && countHours<101)
+			{
+				writeTrustToCsvFile(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation, finalReading);
+				writeTrustToCsvFileD(date, pos, updatedSensor.getId(), updatedSensor.getFineDustReading()[pos], updatedReputation, finalReading);
+			}
 			updatedReputations.put(updatedSensor.getId(), updatedReputation);
 		}
 		for (int sensor : updatedReputations.keySet())
