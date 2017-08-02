@@ -11,13 +11,13 @@ deca = "0.9";
 for i=1:length(types)
 %% Data Extracting 
 
-normal = csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/First/FinalDecision.csv"),1,0);
-attack1_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/First/",types(i),"/FinalDecision1_11.csv"),1,0);
-attack2_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/First/",types(i),"/FinalDecision2_11.csv"),1,0);
-attack3_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/First/",types(i),"/FinalDecision3_11.csv"),1,0);
-attack4_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/First/",types(i),"/FinalDecision4_11.csv"),1,0);
-attack5_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/First/",types(i),"/FinalDecision5_11.csv"),1,0);
-attack6_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/First/",types(i),"/FinalDecision6_11.csv"),1,0);
+normal = csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/First/FinalDecision.csv"),1,0);
+attack1_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/First/",types(i),"/FinalDecision1_11.csv"),1,0);
+attack2_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/First/",types(i),"/FinalDecision2_11.csv"),1,0);
+attack3_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/First/",types(i),"/FinalDecision3_11.csv"),1,0);
+attack4_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/First/",types(i),"/FinalDecision4_11.csv"),1,0);
+attack5_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/First/",types(i),"/FinalDecision5_11.csv"),1,0);
+attack6_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/First/",types(i),"/FinalDecision6_11.csv"),1,0);
 
 normal = transpose(normal(:,3));
 attack_1=transpose(attack1_11(:,3));
@@ -39,13 +39,13 @@ scatter(x,y1,sz,'x');
 
 %% Data Extracting 
 
-normal = csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/FinalDecision.csv"),1,0);
-attack1_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/",types(i),"/FinalDecision1_11.csv"),1,0);
-attack2_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/",types(i),"/FinalDecision2_11.csv"),1,0);
-attack3_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/",types(i),"/FinalDecision3_11.csv"),1,0);
-attack4_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/",types(i),"/FinalDecision4_11.csv"),1,0);
-attack5_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/",types(i),"/FinalDecision5_11.csv"),1,0);
-attack6_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Decay_",deca,"/",types(i),"/FinalDecision6_11.csv"),1,0);
+normal = csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/FinalDecision.csv"),1,0);
+attack1_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/",types(i),"/FinalDecision1_11.csv"),1,0);
+attack2_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/",types(i),"/FinalDecision2_11.csv"),1,0);
+attack3_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/",types(i),"/FinalDecision3_11.csv"),1,0);
+attack4_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/",types(i),"/FinalDecision4_11.csv"),1,0);
+attack5_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/",types(i),"/FinalDecision5_11.csv"),1,0);
+attack6_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Continuous_Attacks/Decay_",deca,"/",types(i),"/FinalDecision6_11.csv"),1,0);
 
 normal = transpose(normal(:,3));
 attack_1=transpose(attack1_11(:,3));

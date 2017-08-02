@@ -51,6 +51,7 @@ clc
        if i==43 || i==40
             hold on
         G =plot(x,cdf_normal,'LineWidth',2);
+        set(gca,'fontsize',24)
         end       
         lgd = legend('Empirical CDF','Fitted Normal Distribution CDF', 'Location','SE');
         lgd.FontSize = 24;
