@@ -4,13 +4,15 @@ close all
 
 %% Looping
 
-types = ["Random-Constant" "Clever-Constant_+5" "Clever-Constant_+10" "Clever-Constant_+15" "Clever-Constant_+50" "Clever-Constant_+200"]; % "Random-Constant" "Clever-Constant_+15" "Clever-Constant_+50"
-deca = "0.9"; 
+types = ["Random-Constant" "Clever-Constant_+5" "Clever-Constant_+10" "Clever-Constant_+15" "Clever-Constant_+50" "Clever-Constant_+200"];
+cc = {'Random-Constant', 'Clever-Constant_+5', 'Clever-Constant_+10', 'Clever-Constant_+15', 'Clever-Constant_+50', 'Clever-Constant_+200'};% "Random-Constant" "Clever-Constant_+15" "Clever-Constant_+50"
+deca = "0.5";
+time = 50;
 
-for i=6:6
+for i=1:1
     figure
     clear c1 c2
-    for j=1:3
+    for j=1:5
 %% Data Extracting 
 
 j=num2str(j);
@@ -35,7 +37,7 @@ attack_6=transpose(attack6_11(:,3));
 j=str2num(j);
 
 x= [0 1/11 2/11 3/11 4/11 5/11 6/11 ];
-y1(j,:)= [0 RMSE(attack_1,normal) RMSE(attack_2,normal) RMSE(attack_3,normal) RMSE(attack_4,normal) RMSE(attack_5,normal) RMSE(attack_6,normal)];
+y1(j,:)= [0 RMSE(attack_1,normal,time) RMSE(attack_2,normal,time) RMSE(attack_3,normal,time) RMSE(attack_4,normal,time) RMSE(attack_5,normal,time) RMSE(attack_6,normal,time)];
 sz = 100;
 
 
@@ -61,7 +63,7 @@ attack_6=transpose(attack6_11(:,3));
 %% RMSE
 j=str2num(j);
 
-y2(j,:)= [0 RMSE(attack_1,normal) RMSE(attack_2,normal) RMSE(attack_3,normal) RMSE(attack_4,normal) RMSE(attack_5,normal) RMSE(attack_6,normal)];
+y2(j,:)= [0 RMSE(attack_1,normal,time) RMSE(attack_2,normal,time) RMSE(attack_3,normal,time) RMSE(attack_4,normal,time) RMSE(attack_5,normal,time) RMSE(attack_6,normal,time)];
 
 
     end
@@ -78,15 +80,13 @@ yf2(6) = mean(y2(~fails2(:,6),6));
 yf2(7) = mean(y2(~fails2(:,7),7));
 
 fails2 = sum(fails2);
-fails2= [0 fails2];
-fails2 = num2str(fails2)
 
 
 
 %% Plotting
 
-dx = 0;
-dy = 0.4;
+dx = 0.02;
+dy = 0;
 y1 = mean(y1);
 
 scatter(x,y1,sz,'x');
@@ -95,18 +95,25 @@ scatter(x,y1,sz,'x');
 hold on
 
 scatter(x,yf2,sz);
-c = cellstr(fails2);
 
-text(x(6)+dx,yf2(6)+dy,num2str(fails2(6)))
 
-if i~=1
-    title(strcat(strcat("Decay-",deca," "),types(i)));
-else 
-    title(types(i));
+for k =1:7
+    s= num2str(fails2(k));
+    s = strcat(s,'/5');
+text(x(k)+dx,yf2(k)+dy,s,'Color','r')
 end
+
+
 xlabel('attackers to nodes ratio');
 ylabel('root mean square error');
 legend({'constant multiplier','variable multiplier'},'Location','northwest','FontSize',24);
+
+if i~=1
+    title = strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Random_Attack_Decay_',strrep(deca,".","-"),'Decay-',deca,'-',cc{i});
+   print(char(title) ,'-dsvg')
+else 
+    print(char(strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Random_Attack_Decay_',strrep(deca,".","-"))),'-dpdf','bestfit')
+end
 
 y1 = [];
 y2 = [];

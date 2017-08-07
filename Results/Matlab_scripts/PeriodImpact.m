@@ -48,7 +48,7 @@ figures(count) = scatter(x,y1,sz,plotStyle{j});
 legendInfo{j} = ['Frequency= ' int2str(Frequency(j))];
 xlabel('Period length')
 ylabel('RMSE')
-title(strcat(deca," ",types(i)," ",Attackers(k)));
+titles{count}=(strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Peridoic_data/First/',deca,' ',types(i),' ',Attackers(k)));
 end
 legend(legendInfo,'Location','northwest','FontSize',24);
 end
@@ -85,7 +85,7 @@ figures(count) = scatter(x,y2,sz,plotStyle{j});
 legendInfo{j} = ['Frequency= ' int2str(Frequency(j))];
 xlabel('Period length')
 ylabel('RMSE')
-title(strcat(deca," ",types(i)," ",Attackers(k)));
+titles{count}=(strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Peridoic_data/',deca,' ',types(i),' ',Attackers(k)));
 end
 legend(legendInfo,'Location','northwest','FontSize',24);
 end
@@ -95,5 +95,5 @@ end
 %% Figutrs Printing
 h= figures;
 for i=1:length(h)
-  saveas(h(i), ['figure' num2str(i)], 'pdf');
+  print(char(strrep(titles{i},".","-")) ,'-dpdf','-bestfit')
 end

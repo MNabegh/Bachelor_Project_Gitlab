@@ -4,10 +4,12 @@ close all
 
 %% Looping
 
-types = ["Random-Constant" "Clever-Constant_+5" "Clever-Constant_+10" "Clever-Constant_+15" "Clever-Constant_+50" "Clever-Constant_+200"]; % "Random-Constant" "Clever-Constant_+15" "Clever-Constant_+50"
-deca = "0.7"; 
+types = ["Random-Constant" "Clever-Constant_+5" "Clever-Constant_+10" "Clever-Constant_+15" "Clever-Constant_+50" "Clever-Constant_+200"];
+cc = {'Random-Constant', 'Clever-Constant_+5', 'Clever-Constant_+10', 'Clever-Constant_+15', 'Clever-Constant_+50', 'Clever-Constant_+200'};% "Random-Constant" "Clever-Constant_+15" "Clever-Constant_+50"
+deca = "0.975";
+time = 50;
 
-for i=6:6
+for i=5:6
     figure
     clear c1 c2
     for j=1:5
@@ -35,7 +37,7 @@ attack_6=transpose(attack6_11(:,3));
 j=str2num(j);
 
 x= [0 1/11 2/11 3/11 4/11 5/11 6/11 ];
-y1(j,:)= [0 RMSE(attack_1,normal) RMSE(attack_2,normal) RMSE(attack_3,normal) RMSE(attack_4,normal) RMSE(attack_5,normal) RMSE(attack_6,normal)];
+y1(j,:)= [0 RMSE(attack_1,normal,time) RMSE(attack_2,normal,time) RMSE(attack_3,normal,time) RMSE(attack_4,normal,time) RMSE(attack_5,normal,time) RMSE(attack_6,normal,time)];
 sz = 100;
 
 
@@ -61,7 +63,7 @@ attack_6=transpose(attack6_11(:,3));
 %% RMSE
 j=str2num(j);
 
-y2(j,:)= [0 RMSE(attack_1,normal) RMSE(attack_2,normal) RMSE(attack_3,normal) RMSE(attack_4,normal) RMSE(attack_5,normal) RMSE(attack_6,normal)]
+y2(j,:)= [0 RMSE(attack_1,normal,time) RMSE(attack_2,normal,time) RMSE(attack_3,normal,time) RMSE(attack_4,normal,time) RMSE(attack_5,normal,time) RMSE(attack_6,normal,time)];
 
 
     end
@@ -101,14 +103,17 @@ for k =1:7
 text(x(k)+dx,yf2(k)+dy,s,'Color','r')
 end
 
-if i~=1
-    title(strcat(strcat("Decay-",deca," "),types(i)));
-else 
-    title(types(i));
-end
+
 xlabel('attackers to nodes ratio');
 ylabel('root mean square error');
 legend({'constant multiplier','variable multiplier'},'Location','northwest','FontSize',24);
+
+if i~=1
+    title = strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Significantly_shifted_data/',types(i),'_Decay_',strrep(deca,".","-"),'Decay-',deca,'-',cc{i});
+   print(char(title) ,'-dpdf','-bestfit')
+else 
+    print(char(strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Random_Attack_Decay_',strrep(deca,".","-"))),'-dpdf','-bestfit')
+end
 
 y1 = [];
 y2 = [];

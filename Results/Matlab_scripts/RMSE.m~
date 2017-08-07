@@ -1,9 +1,9 @@
-function [ RMSE ] = RMSE( attack,normal,len)
+function [ RMSE ] = RMSE( attack,normal,length)
 if length(normal)~=(length(attack)+1)
     RMSE = -10;
 else
-    normal = normal(2:1+len);
-    attack = attack(1:len);
+    normal = normal(2:2+length);
+    attack = attack(1:length);
     RMSE = sqrt(mean((attack - normal).^2));
     
 end
