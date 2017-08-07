@@ -35,11 +35,9 @@ def main():
 		for f in first:
 			for n in number:
 				for a in add:
-					for p in period:
-						for v in frequency:
-							command ="sudo java -jar /home/nabegh/Bachelor/SubjectooSim/Run.jar "+str(f)+' '+str(d)+' '+str(a)+" "+str(date)+" "+str(n)+" "+str(v)+" "+str(p)
-							os.system(command)
-			command2 = "sudo java -jar /home/nabegh/Bachelor/SubjectooSim/Run2.jar "+str(f)+' '+str(d)+' '+str(date)
+					command ="sudo java -jar /home/nabegh/Bachelor/SubjectooSim/Constant_Sim/Run.jar "+str(f)+' '+str(d)+' '+str(a)+" "+str(date)+" "+str(n)
+					os.system(command)
+			command2 = "sudo java -jar /home/nabegh/Bachelor/SubjectooSim/Constant_Sim/Run2.jar "+str(f)+' '+str(d)+' '+str(date)
 			os.system(command2)
 
 
