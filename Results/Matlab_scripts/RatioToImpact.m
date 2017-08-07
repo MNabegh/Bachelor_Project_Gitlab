@@ -5,12 +5,12 @@ close all
 %% Looping
 
 types = ["Random-Constant" "Clever-Constant_+5" "Clever-Constant_+10" "Clever-Constant_+15" "Clever-Constant_+50" "Clever-Constant_+200"]; % "Random-Constant" "Clever-Constant_+15" "Clever-Constant_+50"
-deca = "0.9"; 
+deca = "0.7"; 
 
-for i=1:6
+for i=6:6
     figure
     clear c1 c2
-    for j=1:3
+    for j=1:5
 %% Data Extracting 
 
 j=num2str(j);
@@ -61,7 +61,7 @@ attack_6=transpose(attack6_11(:,3));
 %% RMSE
 j=str2num(j);
 
-y2(j,:)= [0 RMSE(attack_1,normal) RMSE(attack_2,normal) RMSE(attack_3,normal) RMSE(attack_4,normal) RMSE(attack_5,normal) RMSE(attack_6,normal)];
+y2(j,:)= [0 RMSE(attack_1,normal) RMSE(attack_2,normal) RMSE(attack_3,normal) RMSE(attack_4,normal) RMSE(attack_5,normal) RMSE(attack_6,normal)]
 
 
     end
@@ -96,7 +96,9 @@ scatter(x,yf2,sz);
 
 
 for k =1:7
-text(x(k)+dx,yf2(k)+dy,strcat(num2str(fails2(k)),"/5"),'Color','r')
+    s= num2str(fails2(k));
+    s = strcat(s,'/5');
+text(x(k)+dx,yf2(k)+dy,s,'Color','r')
 end
 
 if i~=1
