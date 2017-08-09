@@ -8,7 +8,7 @@ types = ["Random-Constant" "Clever-Constant_+5" "Clever-Constant_+10" "Clever-Co
 cc = {'Random-Constant', 'Clever-Constant_+5', 'Clever-Constant_+10', 'Clever-Constant_+15', 'Clever-Constant_+50', 'Clever-Constant_+200'};% "Random-Constant" "Clever-Constant_+15" "Clever-Constant_+50"
 deca = "0.975";
 time = 10;
-for 
+ 
 for i=5:6
     figure
     clear c1 c2

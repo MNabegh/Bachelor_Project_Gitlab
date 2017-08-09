@@ -45,7 +45,12 @@ hold on
 y1= [0 RMSE2(Period1,normal,1,Frequency(j)) RMSE2(Period2,normal,2,Frequency(j)) RMSE2(Period3,normal,3,Frequency(j)) RMSE2(Period4,normal,4,Frequency(j)) RMSE2(Period5,normal,5,Frequency(j))];
 sz = 100;
 figures(count) = scatter(x,y1,sz,plotStyle{j});
-legendInfo{j} = ['Frequency= ' int2str(Frequency(j))];
+if Frequency(j) == 18
+legendInfo{j} = ['Frequency= 4/3'];    
+else
+legendInfo{j} = ['Frequency= ' num2str(24.0/(Frequency(j)*1.0))];
+end
+
 xlabel('Period length')
 ylabel('RMSE')
 titles{count}=(strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Peridoic_data/First/',deca,' ',types(i),' ',Attackers(k)));
@@ -82,7 +87,11 @@ y2= [0 RMSE2(Period1,normal,1,Frequency(j)) RMSE2(Period2,normal,2,Frequency(j))
 hold on
 
 figures(count) = scatter(x,y2,sz,plotStyle{j});
-legendInfo{j} = ['Frequency= ' int2str(Frequency(j))];
+if Frequency(j) == 18
+legendInfo{j} = ['Frequency= 4/3'];    
+else
+legendInfo{j} = ['Frequency= ' num2str(24.0/(Frequency(j)*1.0))];
+end
 xlabel('Period length')
 ylabel('RMSE')
 titles{count}=(strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Peridoic_data/',deca,' ',types(i),' ',Attackers(k)));
