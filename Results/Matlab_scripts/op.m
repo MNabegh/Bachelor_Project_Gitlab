@@ -12,7 +12,7 @@ count= 0;
 sz = 100;
 x= [0 1 2 3 4 5];
 plotStyle = {'rx','bo','gd', 'k*'};
-deca = "0.9";
+deca = "0.6";
 
 
 figure
@@ -21,11 +21,11 @@ for j=1:length(Frequency)
 %% Data Extracting 
 
 normal = csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Periodic_Attacks/Decay_",deca,"/FinalDecision.csv"),1,0);
-Period1 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Periodic_Attacks/Decay_",deca,"/Clever-Constant_+50/Frequency",int2str(Frequency(j)),"/","AttackersRatio3_11","/Period1.csv"),1,0);
-Period2 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Periodic_Attacks/Decay_",deca,"/","Clever-Constant_+50","/Frequency",int2str(Frequency(j)),"/","AttackersRatio3_11","/Period2.csv"),1,0);
-Period3 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Periodic_Attacks/Decay_",deca,"/","Clever-Constant_+50","/Frequency",int2str(Frequency(j)),"/","AttackersRatio3_11","/Period3.csv"),1,0);
-Period4 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Periodic_Attacks/Decay_",deca,"/","Clever-Constant_+50","/Frequency",int2str(Frequency(j)),"/","AttackersRatio3_11","/Period4.csv"),1,0);
-Period5 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Periodic_Attacks/Decay_",deca,"/","Clever-Constant_+50","/Frequency",int2str(Frequency(j)),"/","AttackersRatio3_11","/Period5.csv"),1,0);
+Period1 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Periodic_Attacks/Decay_",deca,"/Clever-Constant_+200/Frequency",int2str(Frequency(j)),"/","AttackersRatio2_11","/Period1.csv"),1,0);
+Period2 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Periodic_Attacks/Decay_",deca,"/","Clever-Constant_+200","/Frequency",int2str(Frequency(j)),"/","AttackersRatio2_11","/Period2.csv"),1,0);
+Period3 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Periodic_Attacks/Decay_",deca,"/","Clever-Constant_+200","/Frequency",int2str(Frequency(j)),"/","AttackersRatio2_11","/Period3.csv"),1,0);
+Period4 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Periodic_Attacks/Decay_",deca,"/","Clever-Constant_+200","/Frequency",int2str(Frequency(j)),"/","AttackersRatio2_11","/Period4.csv"),1,0);
+Period5 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Periodic_Attacks/Decay_",deca,"/","Clever-Constant_+200","/Frequency",int2str(Frequency(j)),"/","AttackersRatio2_11","/Period5.csv"),1,0);
 
 normal = transpose(normal(:,3));
 Period1=transpose(Period1(:,3));
@@ -51,7 +51,7 @@ ylabel('RMSE')
 
 end
 legend(legendInfo,'Location','northwest','FontSize',24);
-titles{count}=(strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Peridoic_data/Decay_',deca,' ',"Clever-Constant_50",' ',"AttackersRatio3_11"));
+titles{count}=(strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Peridoic_data/Decay_',deca,' ',"Clever-Constant_200",' ',"AttackersRatio2_11"));
 legend(legendInfo,'Location','northeast','FontSize',24);
 
 
