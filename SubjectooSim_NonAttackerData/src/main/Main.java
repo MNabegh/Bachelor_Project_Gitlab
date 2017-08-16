@@ -17,7 +17,7 @@ public class Main
 		SensorsManager.setDecayFactor(d);
 		SensorsManager.setFirst(first);
 		SensorsManager.setEndSim(24*10+5+1+50);
-		SensorsManager.setSimDate("2017-06-22");
+		SensorsManager.setSimDate("2017-06-22}}");
 		if(!first)
 			run("/Decay_"+d);
 		if(first)
