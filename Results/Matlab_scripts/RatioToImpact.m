@@ -6,8 +6,8 @@ close all
 
 types = ["Random-Constant" "Clever-Constant_+5" "Clever-Constant_+10" "Clever-Constant_+15" "Clever-Constant_+50" "Clever-Constant_+200"];
 cc = {'Random-Constant', 'Clever-Constant_+5', 'Clever-Constant_+10', 'Clever-Constant_+15', 'Clever-Constant_+50', 'Clever-Constant_+200'};% "Random-Constant" "Clever-Constant_+15" "Clever-Constant_+50"
-deca = "0.975";
-time = 10;
+deca = "0.9";
+time = 50;
  
 for i=5:6
     figure
@@ -54,7 +54,7 @@ attack6_11 =  csvread(strcat("/home/nabegh/Bachelor/Results/FinalDecision/Contin
 
 normal = transpose(normal(:,3));
 attack_1=transpose(attack1_11(:,3));
-attack_2=transpose(attack2_11(1:,3));
+attack_2=transpose(attack2_11(:,3));
 attack_3=transpose(attack3_11(:,3));
 attack_4=transpose(attack4_11(:,3));
 attack_5=transpose(attack5_11(:,3));
@@ -71,15 +71,31 @@ y2(j,:)= [0 RMSE(attack_1,normal,time) RMSE(attack_2,normal,time) RMSE(attack_3,
 
 fails2 = y2 == -10;
 
+yt1 = y2(~fails2(:,2),2)
+
+yt5 = y2(~fails2(:,5),5)
+
+
+
 yf2(1) = 0;
-yf2(2) = mean(y2(~fails2(:,2),2));
+yf2(2) = mean(yt1);
 yf2(3) = mean(y2(~fails2(:,3),3));
 yf2(4) = mean(y2(~fails2(:,4),4));
-yf2(5) = mean(y2(~fails2(:,5),5));
+yf2(5) = mean(yt5);
 yf2(6) = mean(y2(~fails2(:,6),6));
 yf2(7) = mean(y2(~fails2(:,7),7));
 
 fails2 = sum(fails2);
+
+yf3(1) = 0;
+yf3(2) = var(y2(~fails2(:,2),2));
+yf3(3) = var(y2(~fails2(:,3),3));
+yf3(4) = var(y2(~fails2(:,4),4));
+yf3(5) = var(y2(~fails2(:,5),5));
+yf3(6) = var(y2(~fails2(:,6),6));
+yf3(7) = var(y2(~fails2(:,7),7));
+
+
 
 
 
@@ -99,20 +115,21 @@ scatter(x,yf2,sz);
 
 for k =1:7
     s= num2str(fails2(k));
-    s = strcat(s,'/5');
+    w= num2str(yf3(k));
+    s = strcat(s,'/5- ',w);
 text(x(k)+dx,yf2(k)+dy,s,'Color','r')
 end
 
 
-xlabel('attackers to nodes ratio');
-ylabel('root mean square error');
+xlabel('attackers to nodes ratio', 'FontSize', 24);
+ylabel('root mean square error', 'FontSize', 24);
 legend({'constant multiplier','variable multiplier'},'Location','northwest','FontSize',24);
 
 if i~=1
-    title = strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Significantly_shifted_data/10/',types(i),'_Decay_',strrep(deca,".","-"),'Decay-',deca,'-',cc{i});
+    title = strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Significantly_shifted_data/',num2str(time),'/',types(i),'_Decay_',strrep(deca,".","-"),'Decay-',deca,'-',cc{i});
    print(char(title) ,'-dpdf','-bestfit')
 else 
-    print(char(strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Random_Attack/10/Random_Attack_Decay_',strrep(deca,".","-"))),'-dpdf','-bestfit')
+    print(char(strcat('/home/nabegh/Bachelor/Results/Graphs/Continuous_Attack/Random_Attack/',num2str(time),'/Random_Attack_Decay_',strrep(deca,".","-"))),'-dpdf','-bestfit')
 end
 
 y1 = [];
